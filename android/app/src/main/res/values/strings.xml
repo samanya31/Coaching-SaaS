@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Exam Edge Student</string>
+    <string name="title_activity_main">Exam Edge Student</string>
+    <string name="package_name">com.examedge.student</string>
+    <string name="custom_url_scheme">com.examedge.student</string>
+</resources>

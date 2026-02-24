@@ -1,0 +1,224 @@
+# OLD PROJECT STRUCTURE (Before Multi-Tenant Migration)
+
+**Date:** February 11, 2026
+**Status:** Single-tenant app with mock data
+
+---
+
+## Folder Structure (Before)
+
+```
+exam-edge-main/
+├── public/
+├── src/
+│   ├── components/
+│   │   ├── admin/
+│   │   ├── student/
+│   │   ├── landing/
+│   │   ├── cards/
+│   │   └── ui/
+│   │
+│   ├── pages/
+│   │   ├── admin/
+│   │   ├── student/
+│   │   └── landing/
+│   │
+│   ├── data/                     ❌ MOCK DATA FILES (To be removed)
+│   │   ├── studentsMockData.ts
+│   │   ├── batchesMockData.ts
+│   │   ├── coursesMockData.ts
+│   │   ├── announcementsMockData.ts
+│   │   ├── liveClassesMockData.ts
+│   │   ├── adminUsersMockData.ts
+│   │   ├── instructorsMockData.ts
+│   │   ├── testsMockData.ts
+│   │   └── bannersMockData.ts
+│   │
+│   ├── hooks/                    (Some custom hooks existed)
+│   ├── App.tsx
+│   └── main.tsx
+│
+├── package.json
+└── vite.config.ts
+```
+
+---
+
+## Key Characteristics
+
+### Single Tenant
+- **ONE hardcoded coaching institute:** "ExamEdge Academy"
+- No multi-tenancy support
+- No coaching_id concept
+- Everyone sees same data
+
+### Mock Data
+All data stored in local TypeScript files:
+- `studentsMockData.ts` - Array of ~10 students
+- `batchesMockData.ts` - Array of batches
+- `coursesMockData.ts` - Array of courses
+- etc.
+
+**Problem:** Static, not scalable, no database
+
+### No Backend
+- ❌ No database
+- ❌ No API
+- ❌ No authentication
+- ❌ No user accounts
+- ❌ No data persistence
+
+### Single Branding
+- Hardcoded name: "ExamEdge Academy"
+- Fixed color scheme (Indigo/Purple)
+- No customization
+- Same theme for all users
+
+### No User Roles
+- No login system
+- No role-based access control
+- Anyone can access admin/student pages
+
+---
+
+## Data Structure (Before)
+
+### Example: studentsMockData.ts
+```typescript
+export const studentsData = [
+  {
+    id: '1',
+    name: 'John Doe',
+    email: 'john@example.com',
+    examGoal: 'JEE',
+    // ... other fields
+  },
+  // ... more students
+];
+```
+
+**Issues:**
+- ❌ No coaching_id
+- ❌ Hardcoded in file
+- ❌ Can't add new students (only in code)
+- ❌ No persistence
+
+---
+
+## Component Usage (Before)
+
+### Example: Students.tsx
+```typescript
+import { studentsData } from '@/data/studentsMockData';
+
+export const Students = () => {
+  const students = studentsData;  // ❌ Static import
+  
+  return (
+    <div>
+      <h1>ExamEdge Academy</h1>  {/* ❌ Hardcoded */}
+      {students.map(student => ...)}
+    </div>
+  );
+};
+```
+
+**Problems:**
+- Hardcoded coaching name
+- Direct import of mock data
+- No loading states
+- No error handling
+- No multi-tenancy
+
+---
+
+## What Was Missing
+
+### Infrastructure
+- ❌ No `app/providers/` folder
+- ❌ No `config/` folder
+- ❌ No `services/` folder
+- ❌ No `types/` folder (proper interfaces)
+- ❌ No database configuration
+
+### Multi-Tenancy
+- ❌ No tenant detection
+- ❌ No coaching_id field
+- ❌ No RLS (Row-Level Security)
+- ❌ No domain-based routing
+- ❌ No isolated data
+
+### Authentication
+- ❌ No user login
+- ❌ No sessions
+- ❌ No role-based access
+- ❌ No permissions
+
+### Theming
+- ❌ No dynamic colors
+- ❌ No logo customization
+- ❌ No template system
+
+---
+
+## Why Migration Needed
+
+### Current Limitations
+1. **Not scalable** - Can only serve one coaching institute
+2. **No real data** - Everything is mock/hardcoded
+3. **No persistence** - Refresh = data lost
+4. **No SaaS** - Can't sell to multiple customers
+5. **No users** - No login, no accounts
+6. **No customization** - One size fits all
+
+### Business Impact
+- ❌ Can't sell to multiple coaching institutes
+- ❌ Can't charge subscription fees
+- ❌ Can't customize per customer
+- ❌ No recurring revenue model
+
+---
+
+## Migration Goals
+
+**Transform FROM:**
+- Single-tenant mock data app
+- Hardcoded "ExamEdge Academy"
+- No backend, no users
+
+**Transform TO:**
+- Multi-tenant SaaS platform
+- Unlimited coaching institutes
+- Real database (Supabase)
+- User authentication
+- Custom branding per tenant
+- Subscription plans
+
+---
+
+## Files That Will Be Deleted
+
+After complete migration:
+```
+src/data/
+├── studentsMockData.ts          ❌ DELETE
+├── batchesMockData.ts           ❌ DELETE
+├── coursesMockData.ts           ❌ DELETE
+├── announcementsMockData.ts     ❌ DELETE
+├── liveClassesMockData.ts       ❌ DELETE
+├── adminUsersMockData.ts        ❌ DELETE
+├── instructorsMockData.ts       ❌ DELETE
+├── testsMockData.ts             ❌ DELETE
+└── bannersMockData.ts           ❌ DELETE
+```
+
+**Timeline:** Phase 6 (after all pages migrated)
+
+---
+
+## Summary
+
+**Before:** Simple single-tenant app with mock data  
+**After:** Enterprise-ready multi-tenant SaaS platform  
+
+**Migration Status:** Phase 1 Complete ✅

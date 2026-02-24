@@ -1,0 +1,274 @@
+# PHASE 2: DATABASE + TENANT FOUNDATION - COMPLETE
+
+**Date:** February 11, 2026  
+**Duration:** ~3 hours  
+**Status:** ✅ COMPLETE  
+**Impact:** Multi-tenant database ready with 5 test users
+
+---
+
+## OBJECTIVE
+
+Create multi-tenant database with Row-Level Security and implement tenant detection.
+
+---
+
+## TASKS COMPLETED
+
+### 1. Database Schema Created ✅
+
+**File:** `supabase/migrations/001_initial_schema.sql`
+
+**10 Tables:**
+1. coachings - Tenant master table
+2. users - User profiles (links to auth.users)
+3. batches - Class batches
+4. batch_enrollments - Student enrollments
+5. courses - Course catalog
+6. course_content - Videos, PDFs, tests
+7. live_classes - Scheduled classes
+8. announcements - Coaching news
+9. test_submissions - Test results
+10. progress_tracking - Learning progress
+
+**Key:** ALL tables have `coaching_id` for tenant isolation
+
+---
+
+### 2. RLS Policies Implemented ✅
+
+**File:** `supabase/migrations/002_rls_policies_FIXED.sql`
+
+**Helper Functions (public schema):**
+- `public.current_user_coaching_id()` - Get user's coaching
+- `public.current_user_role()` - Get user's role
+- `public.is_super_admin()` - Check super admin
+- `public.is_coaching_admin()` - Check coaching admin
+
+**Security:**
+- RLS enabled on all 10 tables
+- Role-based permissions (admin, teacher, student)
+- SET search_path prevents privilege escalation
+- Users can ONLY see their coaching's data
+
+---
+
+### 3. Seed Data Created ✅
+
+**File:** `supabase/migrations/003_seed_data_FIXED.sql`
+
+**3 Coaching Institutes:**
+- Demo Coaching Academy (demo-coaching) - Pro plan
+- ABC Test Academy (abc-coaching) - Basic plan
+- XYZ Coaching Center (xyz-coaching) - Free plan
+
+**Data Distribution:**
+- 6 Batches (2 per coaching)
+- 8 Courses (Demo:3, ABC:2, XYZ:3)
+- 6 Announcements (2 per coaching)
+
+**Note:** No users in seed (requires real Supabase Auth)
+
+---
+
+### 4. TenantProvider Implemented ✅
+
+**File:** `src/app/providers/TenantProvider.tsx`
+
+**Features:**
+- Detects coaching from `?tenant=slug` URL parameter
+- Fetches coaching data from Supabase
+- Provides coaching context to entire app
+- Loading and error states
+
+**Usage:**
+```typescript
+const { coaching, coachingId } = useTenant();
+// coaching.name, coaching.primary_color, etc.
+```
+
+---
+
+### 5. Test Users Created ✅
+
+**5 Users via Supabase Dashboard:**
+
+| Email | Role | Coaching | Student ID |
+|-------|------|----------|------------|
+| admin@demo.com | coaching_admin | Demo | - |
+| teacher@demo.com | teacher | Demo | - |
+| student@demo.com | student | Demo | DEMO001 |
+| admin@abc.com | coaching_admin | ABC | - |
+| student@abc.com | student | ABC | ABC001 |
+
+**Process:**
+1. Created in Authentication → Users
+2. Linked to coaching via SQL INSERT
+3. All users can login and authenticate
+
+---
+
+## FILES CREATED
+
+**Database Migrations:**
+1. `001_initial_schema.sql` - Schema (10 tables)
+2. `002_rls_policies_FIXED.sql` - RLS policies
+3. `003_seed_data_FIXED.sql` - Test data
+
+**Implementation:**
+4. `TenantProvider.tsx` - Tenant detection (updated)
+
+**Documentation:**
+5. `SETUP_GUIDE.md` - Supabase setup
+6. `RLS_TESTING_GUIDE.md` - RLS testing
+7. `BEFORE_PHASE_3.md` - Critical checklist
+8. `USER_CREATION_GUIDE.md` - User creation guide
+9. `updates/phase2.txt` - This file
+
+**Modified Files:**
+- `.env.local` - Added Supabase credentials
+
+---
+
+## VERIFICATION
+
+### Database Structure
+```sql
+SELECT tablename, rowsecurity 
+FROM pg_tables 
+WHERE schemaname = 'public';
+-- All 10 tables show RLS enabled ✅
+```
+
+### Data Distribution
+```sql
+SELECT c.name, 
+       COUNT(DISTINCT b.id) as batches,
+       COUNT(DISTINCT cr.id) as courses,
+       COUNT(DISTINCT u.id) as users
+FROM coachings c
+LEFT JOIN batches b ON c.id = b.coaching_id
+LEFT JOIN courses cr ON c.id = cr.coaching_id
+LEFT JOIN users u ON c.id = u.coaching_id
+GROUP BY c.name;
+
+-- Result:
+-- ABC Test Academy      | 2 | 2 | 2
+-- Demo Coaching Academy | 2 | 3 | 3
+-- XYZ Coaching Center   | 2 | 3 | 0
+```
+
+### Multi-Tenancy Test
+```
+URL: localhost:5173?tenant=demo-coaching
+Console: [TenantProvider] Loaded coaching: Demo Coaching Academy ✅
+
+URL: localhost:5173?tenant=abc-coaching
+Console: [TenantProvider] Loaded coaching: ABC Test Academy ✅
+
+URL: localhost:5173?tenant=xyz-coaching
+Console: [TenantProvider] Loaded coaching: XYZ Coaching Center ✅
+```
+
+---
+
+## KEY ACHIEVEMENTS
+
+✅ **Production-Ready Schema**
+- Users linked to auth.users (proper auth flow)
+- coaching_id on all tables
+- Proper foreign keys with CASCADE
+- Indexes for performance
+
+✅ **Security First**
+- RLS on all tables
+- Helper functions in public schema
+- SET search_path prevents attacks
+- Role-based permissions
+
+✅ **Multi-Tenancy Verified**
+- 3 coaching institutes isolated
+- 5 real authenticated users
+- Data queries filter by coaching_id
+- Cross-tenant access blocked
+
+✅ **Developer Experience**
+- Clear SQL migrations
+- Comprehensive testing guides
+- User creation documented
+- TenantProvider working
+
+---
+
+## LESSONS LEARNED
+
+### 1. Schema Namespacing
+**Issue:** `auth.is_super_admin()` permission denied  
+**Fix:** Create functions in `public` schema  
+**Why:** Supabase doesn't allow creating in auth schema
+
+### 2. UUID Quoting
+**Issue:** `ERROR: trailing junk after numeric literal`  
+**Fix:** Always quote UUIDs: `'uuid-value'`  
+**Why:** PostgreSQL tries to parse as scientific notation
+
+### 3. Auth Architecture
+**Issue:** Can't insert fake users in seed data  
+**Fix:** users.id REFERENCES auth.users(id)  
+**Why:** Production-correct design requires real auth  
+**Impact:** Users created via Dashboard, not seed SQL
+
+---
+
+## WHAT'S NOT DONE YET
+
+❌ Services to fetch data (Phase 3)
+❌ React hooks for components (Phase 3)
+❌ Pages using database (Phase 4)
+❌ Domain-based routing (Phase 5)
+❌ Dynamic theming (Phase 5)
+❌ Mock data still in use (Until Phase 4)
+
+---
+
+## NEXT PHASE
+
+**Phase 3: Tenant-Aware Services & Hooks**
+
+Will create:
+- `src/services/api/user.service.ts`
+- `src/services/api/batch.service.ts`
+- `src/services/api/course.service.ts`
+- `src/hooks/data/useUsers.ts`
+- `src/hooks/data/useBatches.ts`
+- `src/hooks/data/useCourses.ts`
+
+**Key:** All services filter by coaching_id from TenantProvider
+
+**Estimated Time:** 3-4 days
+
+---
+
+## SUMMARY
+
+**Before Phase 2:**
+- No database
+- No tenant detection
+- Mock data only
+
+**After Phase 2:**
+- ✅ 10 tables with coaching_id
+- ✅ RLS protecting all data
+- ✅ 3 coaching institutes
+- ✅ 5 authenticated users
+- ✅ TenantProvider working
+- ✅ Multi-tenancy verified
+
+**Status:** ✅ PHASE 2 COMPLETE
+
+**Next:** Phase 3 - Tenant-Aware Services & Hooks
+
+---
+
+Last Updated: February 11, 2026  
+**Progress:** 2/6 phases (33%)
