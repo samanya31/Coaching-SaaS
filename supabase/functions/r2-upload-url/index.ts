@@ -32,13 +32,17 @@ Deno.serve(async (req) => {
         const accessKey = Deno.env.get("R2_ACCESS_KEY_ID")!;
         const secretKey = Deno.env.get("R2_SECRET_ACCESS_KEY")!;
         const bucket = Deno.env.get("R2_BUCKET_NAME") ?? "exam-edge-media";
-        const publicBase = Deno.env.get("R2_PUBLIC_URL")!; // e.g. https://pub-xxx.r2.dev
+        const publicBase = Deno.env.get("R2_PUBLIC_URL")!;
 
         // --- Build S3-compatible R2 client ---
+        // IMPORTANT: Set requestChecksumCalculation to "WHEN_REQUIRED" to prevent
+        // AWS SDK v3 from adding CRC32 checksum headers (x-amz-checksum-crc32) that
+        // Cloudflare R2 doesn't support — this was causing video uploads to hang at 90%.
         const client = new S3Client({
             region: "auto",
             endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
             credentials: { accessKeyId: accessKey, secretAccessKey: secretKey },
+            requestChecksumCalculation: "WHEN_REQUIRED",
         });
 
         // --- Generate presigned PUT URL (15 min expiry) ---
@@ -48,7 +52,12 @@ Deno.serve(async (req) => {
             ContentType: contentType,
         });
 
-        const uploadUrl = await getSignedUrl(client, command, { expiresIn: 900 });
+        const uploadUrl = await getSignedUrl(client, command, {
+            expiresIn: 900,
+            // Exclude checksum headers from the signed URL — R2 rejects them
+            unhoistableHeaders: new Set(["x-amz-checksum-crc32", "x-amz-sdk-checksum-algorithm"]),
+        });
+
         const publicUrl = `${publicBase}/${path}`;
 
         return new Response(
