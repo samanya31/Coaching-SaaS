@@ -1,40 +1,52 @@
 import { useEffect, useState } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
+import { supabase } from '@/config/supabase';
 
 export const AdminProtectedRoute = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
     useEffect(() => {
-        // localStorage-only check — fast and no DB dependency.
-        // The admin user is written on successful login and cleared on logout.
-        // Role was verified at login time against the DB.
-        const storedUser = localStorage.getItem('adminUser');
+        const verifyAdmin = async () => {
+            const storedUser = localStorage.getItem('adminUser');
 
-        if (!storedUser) {
-            setIsAuthenticated(false);
-            setIsLoading(false);
-            return;
-        }
-
-        try {
-            const adminUser = JSON.parse(storedUser);
-
-            if (!adminUser?.id || !adminUser?.role) {
-                localStorage.removeItem('adminUser');
+            if (!storedUser) {
                 setIsAuthenticated(false);
-            } else if (!['coaching_admin', 'super_admin', 'teacher', 'staff'].includes(adminUser.role)) {
-                localStorage.removeItem('adminUser');
-                setIsAuthenticated(false);
-            } else {
-                setIsAuthenticated(true);
+                setIsLoading(false);
+                return;
             }
-        } catch {
-            localStorage.removeItem('adminUser');
-            setIsAuthenticated(false);
-        }
 
-        setIsLoading(false);
+            try {
+                const adminUser = JSON.parse(storedUser);
+
+                // Basic role check from localStorage
+                if (!adminUser?.id || !adminUser?.role ||
+                    !['coaching_admin', 'super_admin', 'teacher', 'staff'].includes(adminUser.role)) {
+                    localStorage.removeItem('adminUser');
+                    setIsAuthenticated(false);
+                    setIsLoading(false);
+                    return;
+                }
+
+                // Cross-check with current Supabase session to avoid mismatched JWT/localStorage
+                const { data: { user } } = await supabase.auth.getUser();
+
+                if (!user || user.id !== adminUser.id) {
+                    // Session belongs to someone else (e.g., a student/teacher) – force re-login.
+                    localStorage.removeItem('adminUser');
+                    setIsAuthenticated(false);
+                } else {
+                    setIsAuthenticated(true);
+                }
+            } catch {
+                localStorage.removeItem('adminUser');
+                setIsAuthenticated(false);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        verifyAdmin();
     }, []);
 
     if (isLoading) {

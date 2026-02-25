@@ -34,6 +34,18 @@ export const TenantProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             const studentUserStr = localStorage.getItem('studentUser');
             let tenantSlug = 'demo-coaching'; // Ultimate fallback
 
+            // On student routes with NO logged-in student and NO explicit tenant param,
+            // do NOT force the "demo-coaching" tenant. This avoids the brief flash of
+            // the demo coaching UI on student login/logout.
+            if (isStudentRoute && !studentUserStr) {
+                const params = new URLSearchParams(window.location.search);
+                if (!params.get('tenant')) {
+                    setCoaching(null);
+                    setIsLoading(false);
+                    return;
+                }
+            }
+
             if (isAdminRoute && adminUserStr) {
                 // Admin portal — use admin user's coaching
                 try {

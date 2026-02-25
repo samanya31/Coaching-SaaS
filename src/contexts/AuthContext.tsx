@@ -43,23 +43,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         const initAuth = async () => {
             try {
-                const storedUser = localStorage.getItem('studentUser');
-                if (storedUser) {
-                    const parsed = JSON.parse(storedUser);
-                    if (parsed?.id) {
-                        setUser(parsed);
+                        const storedUser = localStorage.getItem('studentUser');
+                        if (storedUser) {
+                            const parsed = JSON.parse(storedUser);
+                            if (parsed?.id) {
+                                setUser(parsed);
 
-                        // Check if we also have a Supabase session (required for RLS)
-                        const { data: { session } } = await supabase.auth.getSession();
-                        if (!session) {
-                            console.warn('Student restored from localStorage but no Supabase session found. RLS queries might fail.');
-                            // Note: we can't auto-login here because we don't store the password.
-                            // The user will need to log out and log back in to get a full session if they hit 401s.
-                        } else {
-                            console.log('✅ Student session recovered with Supabase JWT.');
+                                // Check if we also have a Supabase session (required for RLS)
+                                const { data: { session } } = await supabase.auth.getSession();
+                                if (!session) {
+                                    console.warn('Student restored from localStorage but no Supabase session found. Clearing stale session and forcing re-login.');
+                                    // Clear stale local session so the app doesn't run with broken RLS permissions
+                                    setUser(null);
+                                    localStorage.removeItem('studentUser');
+                                } else {
+                                    console.log('✅ Student session recovered with Supabase JWT.');
+                                }
+                            }
                         }
-                    }
-                }
             } catch (e) {
                 console.error('Auth initialization error:', e);
                 localStorage.removeItem('studentUser');

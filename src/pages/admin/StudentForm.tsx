@@ -8,6 +8,7 @@ import { supabase } from '@/config/supabase';
 import { toast } from 'sonner';
 import { useTenant } from '@/app/providers/TenantProvider';
 import r2 from '@/services/r2.service';
+import { createStudentAccount } from '@/services/admin/studentManagement.service';
 
 const examGoals = ['JEE', 'NEET', 'UPSC', 'Government', 'Banking', 'Engineering', 'College'];
 const languages = ['Hinglish', 'English', 'Hindi'];
@@ -148,11 +149,23 @@ export const StudentForm = () => {
         };
 
         try {
-            // Hash password if provided
+            // Hash password if provided (for legacy flows touching password_hash)
             if (formData.password) {
                 const bcrypt = await import('bcryptjs');
                 const hashedPassword = await bcrypt.hash(formData.password, 10);
                 studentData.password_hash = hashedPassword;
+
+                // Also update Supabase Auth password for this user (requires service-level key)
+                // so that supabase.auth.signInWithPassword({ email, password }) succeeds.
+                if (isEdit && id) {
+                    try {
+                        await supabase.auth.admin.updateUserById(id, {
+                            password: formData.password,
+                        });
+                    } catch (err) {
+                        console.warn('Auth password update failed for student:', err);
+                    }
+                }
             }
 
             if (isEdit) {
@@ -170,15 +183,37 @@ export const StudentForm = () => {
                 toast.success('Student updated successfully!');
                 alert('Student updated successfully!\n\nNote: The student\'s security session will be automatically synchronized when they next log in.');
             } else {
-                const created = await createUserMutation.mutateAsync(studentData);
+                // NEW STUDENT: create both auth user and profile via RPC
+                if (!coachingId) {
+                    alert('Coaching context not loaded. Please refresh the page and try again.');
+                    return;
+                }
+
+                if (!formData.email) {
+                    alert('Please set an email (login ID) for the student.');
+                    return;
+                }
+
+                const { user: createdUser, credentials } = await createStudentAccount({
+                    email: formData.email,
+                    phone: formData.phone,
+                    full_name: formData.name,
+                    coaching_id: coachingId,
+                    password: formData.password,
+                    exam_goal: formData.examGoal,
+                    address: '', // optional in current UI
+                    personal_email: null as any
+                });
+
                 // Upload avatar for new student after creation
-                if (avatarFile && created?.id) {
-                    const avatarUrl = await uploadAvatarForUser(created.id);
+                if (avatarFile && createdUser?.id) {
+                    const avatarUrl = await uploadAvatarForUser(createdUser.id);
                     if (avatarUrl) {
-                        await supabase.from('users').update({ avatar_url: avatarUrl }).eq('id', created.id);
+                        await supabase.from('users').update({ avatar_url: avatarUrl }).eq('id', createdUser.id);
                     }
                 }
-                alert(`Student created successfully!\n\nEmail: ${formData.email}\nPassword: ${formData.password || '(No password set)'}\n\nNote: A security account will be created automatically when the student first logs in.`);
+
+                alert(`Student created successfully!\n\nEmail: ${credentials.email}\nPassword: ${credentials.password}`);
             }
             navigate('/admin/dashboard/students');
         } catch (error: any) {

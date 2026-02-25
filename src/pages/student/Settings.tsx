@@ -127,31 +127,15 @@ export const StudentSettings = () => {
 
             if (error) throw error;
 
-            // Also sync Supabase Auth password so RLS sessions continue to work.
-            // Sign in with current password first (to get a session), then update.
-            let syncSuccess = false;
-            try {
-                const { error: signInErr } = await supabase.auth.signInWithPassword({
-                    email: user.email,
-                    password: pwData.current,
-                });
-                if (!signInErr) {
-                    const { error: updateErr } = await supabase.auth.updateUser({ password: pwData.newPw });
-                    if (!updateErr) syncSuccess = true;
-                    else console.warn('Supabase Auth password update failed:', updateErr.message);
-                } else {
-                    console.warn('Supabase Auth sync-sign-in failed:', signInErr.message);
-                }
-            } catch (err) {
-                console.error('Supabase Auth sync exception:', err);
+            // Also update Supabase Auth password for the current logged-in user
+            const { error: authError } = await supabase.auth.updateUser({ password: pwData.newPw });
+            if (authError) {
+                console.warn('Supabase Auth password update failed:', authError.message);
+                toast.success('Password changed, but you may need to log out and log in again.');
+            } else {
+                toast.success('Password changed successfully.');
             }
 
-            if (syncSuccess) {
-                toast.success('Password changed and security synced successfully');
-            } else {
-                toast.success('Password changed locally');
-                toast.info('Security session might need a fresh login to update data access.');
-            }
             setPwData({ current: '', newPw: '', confirm: '' });
         } catch (err: any) {
             toast.error(err?.message || 'Failed to change password');

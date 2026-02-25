@@ -3,36 +3,36 @@ import { supabase } from '@/config/supabase';
 /**
  * Create student account with email+password (Admin only)
  * Uses Postgres function to bypass client-side auth.admin restrictions
- * 1. Generate email from phone + coaching subdomain
+ * 1. Use the email entered in the admin panel
  * 2. Call RPC function to create auth user + profile
  * 3. Enroll in batch (handled by function)
  * 4. Return credentials for admin to share with student
  */
 export async function createStudentAccount(data: {
+    email: string;
     phone: string;
     full_name: string;
     coaching_id: string;
-    coaching_subdomain: string; // e.g., 'abc', 'demo'
-    password: string;
+    password?: string;
     batch_id?: string;
     exam_goal?: string;
-    address: string;
+    address?: string;
     personal_email?: string;
 }) {
-    // Step 1: Generate email
-    const phoneDigits = data.phone.replace(/\D/g, ''); // Remove non-digits
-    const email = `student${phoneDigits}@${data.coaching_subdomain}.edu`;
+    const phoneDigits = data.phone.replace(/\D/g, '');
+    const passwordToUse = data.password || phoneDigits; // Default to phone if empty
+    const email = data.email;
 
-    // Step 2: Call Postgres function to create student
+    // Call Postgres function to create student (auth user + profile + optional enrollment)
     const { data: result, error } = await supabase.rpc('create_student_account', {
         p_email: email,
-        p_password: data.password || phoneDigits, // Default to phone if empty
+        p_password: passwordToUse,
         p_phone: data.phone,
         p_full_name: data.full_name,
         p_coaching_id: data.coaching_id,
+        p_address: data.address || null,
         p_exam_goal: data.exam_goal || null,
         p_batch_id: data.batch_id || null,
-        p_address: data.address || null,
         p_personal_email: data.personal_email || null
     });
 
@@ -53,7 +53,7 @@ export async function createStudentAccount(data: {
         },
         credentials: {
             email,
-            password: data.password || phoneDigits
+            password: passwordToUse
         }
     };
 }
