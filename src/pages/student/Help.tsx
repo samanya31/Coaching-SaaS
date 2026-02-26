@@ -72,7 +72,7 @@ export const StudentHelp = () => {
     };
 
     return (
-        <div className="pb-16 space-y-6 px-4">
+        <div className="pb-16 space-y-4 px-2 sm:px-4">
             {/* Header */}
             <div className="pt-2">
                 <h1 className="text-2xl font-bold text-gray-900">Help & Support</h1>
@@ -80,21 +80,21 @@ export const StudentHelp = () => {
             </div>
 
             {/* ── Section 1: Contact Institute ── */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                <h2 className="text-base font-semibold text-gray-800 mb-1">Contact Institute</h2>
-                <p className="text-xs text-gray-400 mb-5">Reach out to your coaching directly.</p>
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-3">
+                <h2 className="text-sm font-semibold text-gray-800 mb-0.5">Contact Institute</h2>
+                <p className="text-xs text-gray-400 mb-3">Reach out to your coaching directly.</p>
 
                 {!hasContact ? (
                     <p className="text-sm text-gray-400 italic">Contact details not set by admin yet. Check back later.</p>
                 ) : (
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                         {phone && (
                             <a
                                 href={`tel:${phone}`}
-                                className="flex items-center gap-4 p-4 rounded-xl bg-blue-50 hover:bg-blue-100 transition-colors group"
+                                className="flex items-center gap-3 p-3 rounded-xl bg-blue-50 hover:bg-blue-100 transition-colors group"
                             >
-                                <div className="w-10 h-10 rounded-full bg-blue-100 group-hover:bg-blue-200 flex items-center justify-center flex-shrink-0 transition-colors">
-                                    <Phone className="w-5 h-5 text-blue-600" />
+                                <div className="w-8 h-8 rounded-full bg-blue-100 group-hover:bg-blue-200 flex items-center justify-center flex-shrink-0 transition-colors">
+                                    <Phone className="w-4 h-4 text-blue-600" />
                                 </div>
                                 <div>
                                     <p className="text-xs text-blue-500 font-medium uppercase tracking-wide">Call Us</p>
@@ -105,10 +105,10 @@ export const StudentHelp = () => {
                         {email && (
                             <a
                                 href={`mailto:${email}`}
-                                className="flex items-center gap-4 p-4 rounded-xl bg-purple-50 hover:bg-purple-100 transition-colors group"
+                                className="flex items-center gap-3 p-3 rounded-xl bg-purple-50 hover:bg-purple-100 transition-colors group"
                             >
-                                <div className="w-10 h-10 rounded-full bg-purple-100 group-hover:bg-purple-200 flex items-center justify-center flex-shrink-0 transition-colors">
-                                    <Mail className="w-5 h-5 text-purple-600" />
+                                <div className="w-8 h-8 rounded-full bg-purple-100 group-hover:bg-purple-200 flex items-center justify-center flex-shrink-0 transition-colors">
+                                    <Mail className="w-4 h-4 text-purple-600" />
                                 </div>
                                 <div>
                                     <p className="text-xs text-purple-500 font-medium uppercase tracking-wide">Email Us</p>
@@ -121,10 +121,10 @@ export const StudentHelp = () => {
                                 href={`https://wa.me/${whatsapp.replace(/[^0-9]/g, '')}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex items-center gap-4 p-4 rounded-xl bg-green-50 hover:bg-green-100 transition-colors group"
+                                className="flex items-center gap-3 p-3 rounded-xl bg-green-50 hover:bg-green-100 transition-colors group"
                             >
-                                <div className="w-10 h-10 rounded-full bg-green-100 group-hover:bg-green-200 flex items-center justify-center flex-shrink-0 transition-colors">
-                                    <MessageCircle className="w-5 h-5 text-green-600" />
+                                <div className="w-8 h-8 rounded-full bg-green-100 group-hover:bg-green-200 flex items-center justify-center flex-shrink-0 transition-colors">
+                                    <MessageCircle className="w-4 h-4 text-green-600" />
                                 </div>
                                 <div>
                                     <p className="text-xs text-green-500 font-medium uppercase tracking-wide">WhatsApp</p>
@@ -137,9 +137,9 @@ export const StudentHelp = () => {
             </div>
 
             {/* ── Section 2: FAQs ── */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                <h2 className="text-base font-semibold text-gray-800 mb-1">Frequently Asked Questions</h2>
-                <p className="text-xs text-gray-400 mb-5">Quick answers to common questions.</p>
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-3">
+                <h2 className="text-sm font-semibold text-gray-800 mb-0.5">Frequently Asked Questions</h2>
+                <p className="text-xs text-gray-400 mb-3">Quick answers to common questions.</p>
                 <div className="space-y-2">
                     {FAQS.map((faq, i) => (
                         <div key={i} className="border border-gray-100 rounded-xl overflow-hidden">
@@ -164,9 +164,9 @@ export const StudentHelp = () => {
             </div>
 
             {/* ── Section 3: Report an Issue ── */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                <h2 className="text-base font-semibold text-gray-800 mb-1">Report an Issue</h2>
-                <p className="text-xs text-gray-400 mb-5">Facing a problem? Let us know and we'll get back to you.</p>
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-3">
+                <h2 className="text-sm font-semibold text-gray-800 mb-0.5">Report an Issue</h2>
+                <p className="text-xs text-gray-400 mb-3">Facing a problem? Let us know and we'll get back to you.</p>
 
                 {submitted ? (
                     <div className="flex flex-col items-center py-8 gap-3">
@@ -228,3 +228,4 @@ export const StudentHelp = () => {
         </div>
     );
 };
+

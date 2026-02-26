@@ -1,6 +1,6 @@
 import { XCircle, CheckCircle, X, Trophy, Clock, Target, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 interface TestResultModalProps {
     isOpen: boolean;
@@ -26,14 +26,17 @@ export const TestResultModal = ({ isOpen, onClose, onViewAnalysis, result }: Tes
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="max-w-sm p-0 bg-transparent border-0 shadow-none overflow-hidden">
+                <div className="sr-only">
+                    <DialogTitle>Test Result</DialogTitle>
+                    <DialogDescription>{passed ? 'You passed the test.' : 'Keep practicing!'}</DialogDescription>
+                </div>
                 <div className="bg-white rounded-3xl shadow-2xl overflow-hidden animate-scale-in">
 
                     {/* Top Section with Icon */}
-                    <div className={`relative px-8 pt-10 pb-8 text-center ${
-                        passed
-                            ? 'bg-gradient-to-br from-emerald-50 to-teal-50'
-                            : 'bg-gradient-to-br from-orange-50 to-amber-50'
-                    }`}>
+                    <div className={`relative px-8 pt-10 pb-8 text-center ${passed
+                        ? 'bg-gradient-to-br from-emerald-50 to-teal-50'
+                        : 'bg-gradient-to-br from-orange-50 to-amber-50'
+                        }`}>
                         {/* Close Button */}
                         <button
                             onClick={onClose}
@@ -47,11 +50,10 @@ export const TestResultModal = ({ isOpen, onClose, onViewAnalysis, result }: Tes
                         <div className="absolute bottom-0 right-0 w-24 h-24 rounded-full bg-white/20 translate-x-8 translate-y-8" />
 
                         {/* Status Icon */}
-                        <div className={`relative inline-flex items-center justify-center w-20 h-20 rounded-full mb-5 ${
-                            passed
-                                ? 'bg-emerald-100 ring-4 ring-emerald-200/50'
-                                : 'bg-orange-100 ring-4 ring-orange-200/50'
-                        }`}>
+                        <div className={`relative inline-flex items-center justify-center w-20 h-20 rounded-full mb-5 ${passed
+                            ? 'bg-emerald-100 ring-4 ring-emerald-200/50'
+                            : 'bg-orange-100 ring-4 ring-orange-200/50'
+                            }`}>
                             {passed ? (
                                 <CheckCircle className="w-10 h-10 text-emerald-600" strokeWidth={2} />
                             ) : (
@@ -60,9 +62,8 @@ export const TestResultModal = ({ isOpen, onClose, onViewAnalysis, result }: Tes
                         </div>
 
                         {/* Title & Subtitle */}
-                        <h2 className={`text-2xl font-bold mb-1 ${
-                            passed ? 'text-emerald-800' : 'text-orange-800'
-                        }`}>
+                        <h2 className={`text-2xl font-bold mb-1 ${passed ? 'text-emerald-800' : 'text-orange-800'
+                            }`}>
                             {passed ? 'Well Done!' : 'Keep Practicing!'}
                         </h2>
                         <p className="text-sm text-gray-500">
@@ -94,9 +95,8 @@ export const TestResultModal = ({ isOpen, onClose, onViewAnalysis, result }: Tes
                                     />
                                 </svg>
                                 <div className="absolute inset-0 flex items-center justify-center">
-                                    <span className={`text-xl font-bold ${
-                                        passed ? 'text-emerald-700' : 'text-orange-600'
-                                    }`}>
+                                    <span className={`text-xl font-bold ${passed ? 'text-emerald-700' : 'text-orange-600'
+                                        }`}>
                                         {result.percentage.toFixed(0)}%
                                     </span>
                                 </div>
@@ -144,11 +144,10 @@ export const TestResultModal = ({ isOpen, onClose, onViewAnalysis, result }: Tes
                         </Button>
                         <Button
                             onClick={onViewAnalysis}
-                            className={`flex-1 h-12 rounded-xl font-semibold text-white shadow-lg ${
-                                passed
-                                    ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200'
-                                    : 'bg-orange-500 hover:bg-orange-600 shadow-orange-200'
-                            }`}
+                            className={`flex-1 h-12 rounded-xl font-semibold text-white shadow-lg ${passed
+                                ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200'
+                                : 'bg-orange-500 hover:bg-orange-600 shadow-orange-200'
+                                }`}
                         >
                             <BarChart3 className="w-4 h-4 mr-2" />
                             View Analysis

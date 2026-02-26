@@ -19,6 +19,7 @@ import { BottomNavigation } from './BottomNavigation';
 import { MenuDrawer } from './MenuDrawer';
 import { ExamGoalSelectorModal, ExamGoalButton } from '@/components/ExamGoalSelector';
 import { useExamGoal } from '@/contexts/ExamGoalContext';
+import defaultAvatar from '@/assets/student-avatar.png';
 
 // Fallback logo asset - Removed missing NSDLOGO.png
 // import nsdLogo from '@/assets/NSDLOGO.png';
@@ -125,9 +126,9 @@ export const StudentLayout = () => {
                 </div>
 
                 {/* Right Side Actions */}
-                <div className="flex items-center gap-4 md:gap-8">
-                    {/* Goal Selector (Desktop) */}
-                    <div className="hidden md:block">
+                <div className="flex items-center gap-2 md:gap-8">
+                    {/* Goal Selector */}
+                    <div className="block">
                         <ExamGoalButton
                             currentGoal={selectedGoal.name}
                             icon={selectedGoal.icon}
@@ -143,15 +144,12 @@ export const StudentLayout = () => {
                         </div>
 
                         {/* Avatar circle */}
-                        <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 border-2 border-slate-200"
-                            style={{ background: 'linear-gradient(135deg, #818cf8, #a78bfa)' }}>
-                            {user?.avatar_url ? (
-                                <img src={user.avatar_url} alt={user.name} className="w-full h-full object-cover" />
-                            ) : (
-                                <span className="w-full h-full flex items-center justify-center text-white text-sm font-bold uppercase">
-                                    {user?.name?.charAt(0) || 'S'}
-                                </span>
-                            )}
+                        <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 border border-slate-200 bg-slate-100">
+                            <img
+                                src={user?.avatar_url || defaultAvatar}
+                                alt={user?.name || 'Student'}
+                                className="w-full h-full object-cover"
+                            />
                         </div>
 
                         {/* Logout Button */}
@@ -212,7 +210,7 @@ export const StudentLayout = () => {
                 </aside>
 
                 {/* Main Content (Right) */}
-                <main className="flex-1 lg:ml-72 bg-slate-50 min-h-[calc(100vh-5rem)] p-4 md:p-6">
+                <main className="flex-1 lg:ml-72 bg-slate-50 min-h-[calc(100vh-5rem)] px-2 sm:px-4 md:px-6 py-4 md:py-6 pb-24 lg:pb-6">
                     <div className="w-full">
                         <Outlet />
                     </div>

@@ -6,6 +6,7 @@ import { useBatches } from '@/hooks/data/useBatches';
 import { normalizeBatch } from '@/types/batch';
 import { YouTubeLivePlayer } from '@/components/video/YouTubeLivePlayer';
 import { format } from 'date-fns';
+import liveHero from '@/assets/live.png';
 
 export const StudentLiveClasses = () => {
     const navigate = useNavigate();
@@ -75,19 +76,19 @@ export const StudentLiveClasses = () => {
             )}
 
             {/* Header */}
-            <div className="relative text-white py-16 px-4 overflow-hidden rounded-2xl mx-4 mt-4">
+            <div className="relative text-white py-8 px-4 overflow-hidden rounded-2xl mx-2 mt-2">
                 <img
-                    src="/src/assets/live.png"
+                    src={liveHero}
                     alt="Live Classes"
                     className="absolute inset-0 w-full h-full object-cover rounded-2xl"
                 />
                 <div className="absolute inset-0 bg-black/40 rounded-2xl" />
                 <div className="max-w-7xl mx-auto relative z-10">
-                    <div className="flex items-center gap-3 mb-2">
-                        <Video className="w-8 h-8" />
-                        <h1 className="text-3xl font-bold">Live Classes</h1>
+                    <div className="flex items-center gap-2 mb-1">
+                        <Video className="w-6 h-6" />
+                        <h1 className="text-xl font-bold">Live Classes</h1>
                     </div>
-                    <p className="text-white/80">Join upcoming sessions and access previous recordings</p>
+                    <p className="text-white/80 text-sm">Join upcoming sessions and access previous recordings</p>
                 </div>
             </div>
 

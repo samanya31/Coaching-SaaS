@@ -3,6 +3,7 @@ import { BookOpen, Search } from 'lucide-react';
 import { useBatches } from '@/hooks/data/useBatches';
 import { BatchCard } from '@/components/student/BatchCard';
 import { normalizeBatch } from '@/types/batch';
+import coursesHero from '@/assets/courses.png';
 
 export const StudentCourses = () => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -22,19 +23,19 @@ export const StudentCourses = () => {
     return (
         <div className="min-h-screen bg-gray-50 pb-20 md:pb-8">
             {/* Header */}
-            <div className="relative text-white py-16 px-4 overflow-hidden rounded-2xl mx-4 mt-4">
+            <div className="relative text-white py-8 px-4 overflow-hidden rounded-2xl mx-2 mt-2">
                 <img
-                    src="/src/assets/courses.png"
+                    src={coursesHero}
                     alt="My Courses"
                     className="absolute inset-0 w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-black/40" />
                 <div className="max-w-7xl mx-auto relative z-10">
-                    <div className="flex items-center gap-3 mb-2">
-                        <BookOpen className="w-8 h-8" />
-                        <h1 className="text-3xl font-bold">My Courses</h1>
+                    <div className="flex items-center gap-2 mb-1">
+                        <BookOpen className="w-6 h-6" />
+                        <h1 className="text-xl font-bold">My Courses</h1>
                     </div>
-                    <p className="text-white/80">Continue learning from where you left off</p>
+                    <p className="text-white/80 text-sm">Continue learning from where you left off</p>
                 </div>
             </div>
 

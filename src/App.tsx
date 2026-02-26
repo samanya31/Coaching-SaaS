@@ -2,15 +2,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import About from "./pages/About";
-import Courses from "./pages/Courses";
-import Faculty from "./pages/Faculty";
-import Results from "./pages/Results";
-import DemoClasses from "./pages/DemoClasses";
-import Pricing from "./pages/Pricing";
-import Contact from "./pages/Contact";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useAndroidBackButton } from "@/hooks/useAndroidBackButton";
 import NotFound from "./pages/NotFound";
 
 // Student Portal
@@ -70,24 +63,20 @@ import { SupportTickets } from "./pages/admin/SupportTickets";
 
 const queryClient = new QueryClient();
 
+// Must be rendered inside BrowserRouter to access useNavigate/useLocation
+const AndroidBackHandler = () => { useAndroidBackButton(); return null; };
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <AndroidBackHandler />
         <AuthProvider>
           <MobileRedirect />
           <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<Index />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/courses" element={<Courses />} />
-            <Route path="/faculty" element={<Faculty />} />
-            <Route path="/results" element={<Results />} />
-            <Route path="/demo-classes" element={<DemoClasses />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/contact" element={<Contact />} />
+            <Route path="/" element={<Navigate to="/student/login" replace />} />
 
             {/* Student Portal Routes */}
             <Route path="/student/login" element={

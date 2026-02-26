@@ -170,15 +170,12 @@ export const StudentDashboard = () => {
     ];
 
     return (
-        <div className="p-4 md:p-6 space-y-8 w-full"> {/* Removed max-w-7xl mx-auto */}
-            {/* Header / Exam Goal - Removed as per Refactor */}
-            {/* <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4"> ... </div> */}
-
+        <div className="space-y-5 w-full">
             {/* Hero Section */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="relative overflow-hidden rounded-3xl shadow-xl min-h-[220px] md:min-h-[260px] flex items-center"
+                className="relative overflow-hidden rounded-2xl shadow-xl min-h-[160px] md:min-h-[260px] flex items-center"
                 style={{ background: bannerGradient }}
             >
                 {/* Background Image Overlay */}
@@ -192,33 +189,33 @@ export const StudentDashboard = () => {
                 />
 
                 {/* Content */}
-                <div className="relative z-10 w-full px-6 md:px-10 py-6 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="relative z-10 w-full px-4 md:px-10 py-4 md:py-6 flex flex-col md:flex-row items-center justify-between gap-4">
                     <div className="flex-1 text-center md:text-left">
                         <button
                             onClick={openGoalSelector}
-                            className="inline-block px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm font-medium mb-4 hover:bg-white/20 transition-colors cursor-pointer"
+                            className="inline-block px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white text-xs font-medium mb-2 hover:bg-white/20 transition-colors cursor-pointer"
                         >
                             🎓 {selectedGoal.name} Aspirant
                         </button>
-                        <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 font-display">
+                        <h2 className="text-xl md:text-4xl font-bold text-white mb-1 font-display">
                             Welcome back, {user?.name?.split(' ')[0] || 'Scholar'}!
                         </h2>
-                        <p className="text-blue-100 text-lg max-w-xl mb-6">
+                        <p className="text-blue-100 text-sm md:text-lg max-w-xl mb-3">
                             You have <span className="font-bold text-white">{todayClasses.length} {todayClasses.length === 1 ? 'class' : 'classes'}</span> scheduled for today.
                             Keep up the momentum!
                         </p>
 
-                        <div className="flex flex-wrap gap-3 justify-center md:justify-start">
+                        <div className="flex flex-wrap gap-2 justify-center md:justify-start">
                             <button
                                 onClick={() => navigate('/student/dashboard/courses')}
-                                className="px-6 py-2.5 bg-white text-[#1E3A8A] rounded-xl font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center gap-2"
+                                className="px-4 py-2 sm:px-6 sm:py-2.5 bg-white text-[#1E3A8A] rounded-xl font-bold shadow-md hover:shadow-xl hover:scale-105 transition-all flex items-center gap-1.5 text-sm sm:text-base"
                             >
-                                <PlayCircle className="w-5 h-5" />
+                                <PlayCircle className="w-4 h-4 sm:w-5 sm:h-5" />
                                 Resume Learning
                             </button>
                             <button
                                 onClick={() => navigate('/student/dashboard/live-classes')}
-                                className="px-6 py-2.5 bg-[#ffffff20] backdrop-blur-md border border-white/30 text-white rounded-xl font-semibold hover:bg-[#ffffff30] transition-all"
+                                className="px-4 py-2 sm:px-6 sm:py-2.5 bg-[#ffffff20] backdrop-blur-md border border-white/30 text-white rounded-xl font-semibold hover:bg-[#ffffff30] transition-all text-sm sm:text-base"
                             >
                                 View Schedule
                             </button>

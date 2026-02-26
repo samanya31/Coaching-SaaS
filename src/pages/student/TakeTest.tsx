@@ -139,8 +139,8 @@ export const TakeTest = () => {
             });
 
             // Calculate accuracy (same as percentage for now, or based on correct answers)
-            const accuracy = result.total_marks > 0 
-                ? ((result.score / result.total_marks) * 100) 
+            const accuracy = result.total_marks > 0
+                ? ((result.score / result.total_marks) * 100)
                 : 0;
 
             // Show result modal immediately
@@ -227,9 +227,9 @@ export const TakeTest = () => {
 
     if (!hasStarted) {
         return (
-            <div className="max-w-2xl mx-auto p-6">
-                <div className="bg-white rounded-2xl shadow-lg p-8">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-4">{test.title}</h1>
+            <div className="max-w-2xl mx-auto px-2 sm:px-4 py-4">
+                <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-8">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">{test.title}</h1>
                     {test.description && (
                         <p className="text-gray-600 mb-6">{test.description}</p>
                     )}
@@ -280,27 +280,30 @@ export const TakeTest = () => {
     }
 
     return (
-        <div className="max-w-4xl mx-auto p-6">
+        <div className="max-w-4xl mx-auto px-2 sm:px-4 py-4">
             {/* Timer Header */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6 sticky top-0 z-10">
-                <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-semibold text-gray-900">{test.title}</h2>
-                    <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2">
-                            <Clock className="w-5 h-5 text-indigo-600" />
-                            <span className={`text-lg font-bold ${timeLeft < 300 ? 'text-red-600' : 'text-gray-900'}`}>
-                                {formatTime(timeLeft)}
-                            </span>
-                        </div>
-                        <div className="text-sm text-gray-500">
-                            {Object.keys(answers).length}/{questions.length} answered
-                        </div>
-                        <Button
-                            onClick={() => handleSubmit(false)}
-                            className="bg-green-600 hover:bg-green-700"
-                        >
-                            Submit Test
-                        </Button>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 mb-4 sticky top-0 z-10">
+                {/* Row 1: Title + Submit button */}
+                <div className="flex items-center justify-between gap-2 mb-2">
+                    <h2 className="text-sm sm:text-lg font-semibold text-gray-900 leading-tight line-clamp-2">{test.title}</h2>
+                    <Button
+                        onClick={() => handleSubmit(false)}
+                        className="bg-green-600 hover:bg-green-700 text-xs sm:text-sm px-3 py-1.5 shrink-0"
+                    >
+                        Submit Test
+                    </Button>
+                </div>
+                {/* Row 2: Timer + answered count */}
+                <div className="flex items-center gap-3 text-sm">
+                    <div className="flex items-center gap-1.5">
+                        <Clock className="w-4 h-4 text-indigo-600" />
+                        <span className={`font-bold ${timeLeft < 300 ? 'text-red-600' : 'text-gray-900'}`}>
+                            {formatTime(timeLeft)}
+                        </span>
+                    </div>
+                    <span className="text-gray-400">|</span>
+                    <div className="text-gray-500 text-xs">
+                        {Object.keys(answers).length}/{questions.length} answered
                     </div>
                 </div>
             </div>
@@ -308,18 +311,18 @@ export const TakeTest = () => {
             {/* Questions */}
             <div className="space-y-6">
                 {questions.map((question, index) => (
-                    <div key={question.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                        <div className="flex items-start gap-3 mb-4">
-                            <span className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-lg text-sm font-medium">
+                    <div key={question.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 sm:p-6">
+                        <div className="flex items-start gap-2 sm:gap-3 mb-4">
+                            <span className="bg-indigo-100 text-indigo-700 px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm font-medium shrink-0">
                                 Q{index + 1}
                             </span>
-                            <div className="flex-1">
-                                <p className="text-gray-900 font-medium text-lg">{question.question_text}</p>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-gray-900 font-medium text-sm sm:text-lg break-words">{question.question_text}</p>
                                 <p className="text-xs text-gray-500 mt-1">{question.marks} {question.marks === 1 ? 'mark' : 'marks'}</p>
                             </div>
                         </div>
 
-                        <div className="space-y-3">
+                        <div className="space-y-2 sm:space-y-3">
                             {['A', 'B', 'C', 'D'].map(option => {
                                 const optionKey = `option_${option.toLowerCase()}` as 'option_a' | 'option_b' | 'option_c' | 'option_d';
                                 const isSelected = answers[question.id] === option;
@@ -327,7 +330,7 @@ export const TakeTest = () => {
                                 return (
                                     <label
                                         key={option}
-                                        className={`flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${isSelected
+                                        className={`flex items-start gap-2 sm:gap-3 p-2 sm:p-4 rounded-lg border-2 cursor-pointer transition-all ${isSelected
                                             ? 'border-indigo-500 bg-indigo-50'
                                             : 'border-gray-200 hover:border-indigo-200 hover:bg-gray-50'
                                             }`}
@@ -338,11 +341,11 @@ export const TakeTest = () => {
                                             value={option}
                                             checked={isSelected}
                                             onChange={() => handleAnswerChange(question.id, option)}
-                                            className="mt-1 w-4 h-4 text-indigo-600"
+                                            className="mt-0.5 w-4 h-4 text-indigo-600 shrink-0"
                                         />
-                                        <span className="flex-1">
-                                            <span className="font-medium text-gray-700">{option}.</span>{' '}
-                                            <span className="text-gray-900">{question[optionKey]}</span>
+                                        <span className="flex-1 min-w-0">
+                                            <span className="font-medium text-gray-700 text-sm sm:text-base">{option}.</span>{' '}
+                                            <span className="text-gray-900 text-sm sm:text-base break-words">{question[optionKey]}</span>
                                         </span>
                                     </label>
                                 );

@@ -52,7 +52,7 @@ export const Batches = () => {
     return (
         <div className="min-h-screen bg-gray-50 pb-20 md:pb-8">
             {/* Header */}
-            <div className="relative text-white py-16 px-4 overflow-hidden rounded-2xl mx-4 mt-4">
+            <div className="relative text-white py-8 px-4 overflow-hidden rounded-2xl mx-2 mt-2">
                 <img
                     src="/src/assets/batch.png"
                     alt="Batches"
@@ -65,11 +65,11 @@ export const Batches = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5 }}
                     >
-                        <div className="flex items-center gap-3 mb-2">
-                            <BookOpen className="w-8 h-8" />
-                            <h1 className="text-3xl font-bold">Explore Batches</h1>
+                        <div className="flex items-center gap-2 mb-1">
+                            <BookOpen className="w-6 h-6" />
+                            <h1 className="text-xl font-bold">Explore Batches</h1>
                         </div>
-                        <p className="text-white/80">
+                        <p className="text-white/80 text-sm">
                             Find the perfect course for your exam preparation
                         </p>
                     </motion.div>

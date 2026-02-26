@@ -50,7 +50,7 @@ export const StudentMaterials = () => {
     }
 
     return (
-        <div className="p-6 space-y-6">
+        <div className="space-y-4">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
@@ -91,40 +91,40 @@ export const StudentMaterials = () => {
 
             {/* Materials Grid */}
             {filteredMaterials.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                     {filteredMaterials.map((material, index) => (
                         <motion.div
                             key={material.id}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: index * 0.05 }}
-                            className="bg-white rounded-2xl shadow-lg border border-stone-200 p-6 hover:shadow-xl transition-shadow group"
+                            className="bg-white rounded-xl shadow-sm border border-stone-200 p-3 hover:shadow-md transition-shadow group"
                         >
-                            <div className="flex items-start gap-4 mb-4">
+                            <div className="flex items-start gap-3 mb-2">
                                 {/* File Icon */}
-                                <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${getCategoryColor(material.file_type)} flex items-center justify-center flex-shrink-0 shadow-lg`}>
+                                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-r ${getCategoryColor(material.file_type)} flex items-center justify-center flex-shrink-0 shadow-sm`}>
                                     {getFileIcon(material.file_type)}
                                 </div>
 
                                 <div className="flex-1 min-w-0">
-                                    <h3 className="text-base font-bold text-[#1E3A8A] mb-1 line-clamp-2 group-hover:text-indigo-600 transition-colors">
+                                    <h3 className="text-sm sm:text-base font-bold text-[#1E3A8A] mb-0.5 line-clamp-2 group-hover:text-indigo-600 transition-colors leading-tight">
                                         {material.title}
                                     </h3>
-                                    <p className={`text-xs inline-block px-2 py-0.5 rounded-full line-clamp-1 ${material.is_public ? 'bg-amber-100 text-amber-700' : 'bg-stone-100 text-[#6B7280]'}`}>
+                                    <p className={`text-[10px] sm:text-xs inline-block px-1.5 py-0.5 rounded-full line-clamp-1 ${material.is_public ? 'bg-amber-100 text-amber-700' : 'bg-stone-100 text-[#6B7280]'}`}>
                                         {material.is_public ? 'Current Affairs' : (material.batch?.title || 'General Resource')}
                                     </p>
                                 </div>
                             </div>
 
                             {/* Meta Info */}
-                            <div className="flex items-center justify-between text-xs text-[#6B7280] mb-4 px-1">
+                            <div className="flex items-center justify-between text-[10px] sm:text-xs text-[#6B7280] mb-2 px-1">
                                 <span>{new Date(material.created_at).toLocaleDateString()}</span>
                                 <span className="uppercase">{material.file_type}</span>
                             </div>
 
                             {/* Description (Optional) */}
                             {material.description && (
-                                <p className="text-sm text-stone-500 mb-4 line-clamp-2 min-h-[40px]">
+                                <p className="text-xs sm:text-sm text-stone-500 mb-2 line-clamp-2">
                                     {material.description}
                                 </p>
                             )}
@@ -137,8 +137,8 @@ export const StudentMaterials = () => {
                                     rel="noopener noreferrer"
                                     className="flex-1"
                                 >
-                                    <Button className="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white rounded-xl gap-2 shadow-md hover:shadow-lg transition-all">
-                                        <Download className="w-4 h-4" />
+                                    <Button className="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white rounded-lg gap-1.5 shadow-sm text-xs sm:text-sm h-8 sm:h-10">
+                                        <Download className="w-3 h-3 sm:w-4 sm:h-4" />
                                         Download / View
                                     </Button>
                                 </a>

@@ -260,17 +260,17 @@ export const StudentSettings = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 pb-20 md:pb-8">
-            <div className="px-4 py-6">
+            <div className="px-2 sm:px-4 py-3">
                 {/* Profile Header Card */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-6"
+                    className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 mb-4"
                 >
-                    <div className="flex flex-col md:flex-row items-center gap-6">
+                    <div className="flex items-center gap-4">
                         {/* Avatar with Upload button */}
-                        <div className="relative">
-                            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white text-5xl font-bold shadow-lg uppercase overflow-hidden">
+                        <div className="relative flex-shrink-0">
+                            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white text-3xl font-bold shadow-lg uppercase overflow-hidden">
                                 {avatarUrl ? (
                                     <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover" />
                                 ) : (
@@ -282,29 +282,29 @@ export const StudentSettings = () => {
                                 type="button"
                                 onClick={() => avatarInputRef.current?.click()}
                                 disabled={isUploadingAvatar}
-                                className="absolute bottom-0 right-0 w-9 h-9 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center shadow-lg transition-colors border-2 border-white"
+                                className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center shadow-lg transition-colors border-2 border-white"
                                 title="Upload profile photo"
                             >
                                 {isUploadingAvatar ? (
-                                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                    <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
                                 ) : (
-                                    <Camera className="w-4 h-4" />
+                                    <Camera className="w-3 h-3" />
                                 )}
                             </button>
                             <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
                         </div>
 
                         {/* Name and Basic Info */}
-                        <div className="flex-1 text-center md:text-left">
-                            <h1 className="text-3xl font-bold text-gray-900 mb-2">{formData.name}</h1>
-                            <div className="flex flex-wrap gap-4 justify-center md:justify-start text-gray-600">
-                                <div className="flex items-center gap-2">
-                                    <Mail className="w-4 h-4" />
-                                    <span className="text-sm">{formData.email}</span>
+                        <div className="flex-1 min-w-0">
+                            <h1 className="text-lg font-bold text-gray-900 mb-1 truncate">{formData.name}</h1>
+                            <div className="flex flex-col gap-1 text-gray-600">
+                                <div className="flex items-center gap-1.5">
+                                    <Mail className="w-3.5 h-3.5 shrink-0" />
+                                    <span className="text-xs truncate">{formData.email}</span>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <Phone className="w-4 h-4" />
-                                    <span className="text-sm">{formData.mobile || 'No mobile'}</span>
+                                <div className="flex items-center gap-1.5">
+                                    <Phone className="w-3.5 h-3.5 shrink-0" />
+                                    <span className="text-xs">{formData.mobile || 'No mobile'}</span>
                                 </div>
                             </div>
                         </div>

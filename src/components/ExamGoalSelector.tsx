@@ -94,11 +94,11 @@ export const ExamGoalButton = ({ currentGoal, icon, onClick }: ExamGoalButtonPro
     return (
         <button
             onClick={onClick}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-full hover:border-indigo-500 hover:shadow-md transition-all"
+            className="flex items-center gap-1 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 bg-white border border-slate-200 rounded-full hover:border-indigo-500 hover:shadow-md transition-all shrink-0"
         >
-            <span className="text-lg">{icon || '🎯'}</span>
-            <span className="font-medium text-gray-900">{currentGoal}</span>
-            <ChevronDown className="w-4 h-4 text-gray-500" />
+            <span className="text-base md:text-lg hidden sm:inline-block">{icon || '🎯'}</span>
+            <span className="font-semibold text-slate-800 text-xs md:text-sm">{currentGoal}</span>
+            <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
         </button>
     );
 };

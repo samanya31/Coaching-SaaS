@@ -6,6 +6,8 @@ import { useTenant } from '@/app/providers/TenantProvider';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/config/supabase';
 import { updateStudentProfile } from '@/services/auth/studentAuth.service';
+import studentPortal from '@/assets/student_portal.png';
+import studentPortalRes from '@/assets/student_portal_res.png';
 
 /**
  * Student Login with Email + Password
@@ -217,88 +219,128 @@ export const StudentLogin = () => {
 
     // Login Screen
     return (
-        <div className="min-h-screen bg-gradient-to-br from-stone-100 via-stone-50 to-stone-100 flex items-center justify-center p-4">
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="w-full max-w-md"
-            >
-                <div className="text-center mb-8">
-                    <Link to="/" className="inline-flex items-center gap-3 mb-4">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-600 to-orange-600 flex items-center justify-center">
-                            <span className="text-white font-bold text-2xl">E</span>
-                        </div>
-                        <span className="text-2xl font-bold text-[#1E3A8A]">Exam Edge</span>
-                    </Link>
-                    <h1 className="text-3xl font-bold text-[#1E3A8A] mb-2">Student Login</h1>
-                    <p className="text-[#6B7280]">Access your learning portal</p>
-                </div>
+        <div className="relative min-h-screen overflow-hidden">
 
-                <div className="bg-white rounded-2xl shadow-xl p-8">
-                    {error && (
-                        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-                            {error}
-                        </div>
-                    )}
+            {/* ===== PAGE BACKGROUND SPLIT ===== */}
+            <div className="absolute inset-0 flex flex-col lg:flex-row">
+                {/* LEFT GREY HALF */}
+                <div className="w-full lg:w-1/2 h-1/2 lg:h-full bg-[#F2F5FA]" />
 
-                    <form onSubmit={handleLogin} className="space-y-6">
-                        <div>
-                            <label htmlFor="email" className="block text-sm font-semibold text-[#374151] mb-2">
-                                Email Address
-                            </label>
-                            <input
-                                id="email"
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                placeholder="student1234567890@coaching.edu"
-                                className="w-full px-4 py-3 border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none transition-colors"
-                                required
+                {/* RIGHT BLUE HALF */}
+                <div className="w-full lg:w-1/2 h-1/2 lg:h-full bg-[#EDF2FF]" />
+            </div>
+
+            {/* ===== CENTER FLOATING CARD ===== */}
+            <div className="relative min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8">
+
+                <div className="
+        w-full
+        max-w-[1400px]
+        h-auto
+        lg:h-[85vh]
+        min-h-[600px]
+        bg-white
+        rounded-3xl
+        shadow-[0_40px_80px_rgba(0,0,0,0.08)]
+        overflow-hidden
+        flex
+        flex-col
+        lg:flex-row
+      ">
+
+                    {/* LEFT LOGIN (100% Mobile/Tablet / 50% Desktop) */}
+                    <div className="w-full lg:w-1/2 flex flex-col pt-0 lg:pt-12 p-8 sm:p-12 lg:px-16 pb-12 overflow-y-auto">
+
+                        <div className="w-[calc(100%+4rem)] -mx-8 sm:-mx-12 h-64 lg:hidden relative shrink-0 -mt-8 sm:-mt-12 bg-[#EAF2FB] overflow-hidden mb-8">
+                            {/* background shapes */}
+                            <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_25%_30%,#c7d2fe,transparent_45%),radial-gradient(circle_at_80%_70%,#bfdbfe,transparent_45%)]" />
+
+                            <img
+                                src={studentPortalRes}
+                                alt="Student Portal"
+                                className="w-full h-full object-contain object-bottom relative z-10"
                             />
-                            <p className="text-xs text-gray-500 mt-1">
-                                Use the email provided by your coaching institute
+                            {/* Gradient Overlay for smooth transition into the white form */}
+                            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white to-transparent z-20"></div>
+                        </div>
+
+                        <div className="w-full max-w-md mx-auto flex flex-col justify-center h-full">
+                            <h1 className="text-3xl font-bold text-[#3B82F6] mb-2">
+                                Login
+                            </h1>
+
+                            <p className="text-[#64748B] text-sm mb-8">
+                                Enter your account details
                             </p>
+
+                            {error && (
+                                <div className="mb-6 p-3 bg-red-50 border border-red-100 rounded-lg text-red-600 text-sm">
+                                    {error}
+                                </div>
+                            )}
+
+                            <form onSubmit={handleLogin} className="space-y-5">
+                                <input
+                                    placeholder="Email Address"
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] outline-none transition-all"
+                                    required
+                                />
+
+                                <input
+                                    placeholder="Password"
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] outline-none transition-all"
+                                    required
+                                />
+
+                                <div className="flex items-center justify-between mt-2">
+                                    <Link to="#" className="text-sm text-[#3B82F6] hover:text-blue-700 font-medium">
+                                        Forgot Password?
+                                    </Link>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={loading || !email || !password}
+                                    className="w-full bg-[#3B82F6] hover:bg-blue-600 transition-colors text-white py-4 rounded-xl font-medium disabled:opacity-50 mt-4"
+                                >
+                                    {loading ? 'Logging in...' : 'Login'}
+                                </button>
+                            </form>
                         </div>
-
-                        <div>
-                            <label htmlFor="password" className="block text-sm font-semibold text-[#374151] mb-2">
-                                Password
-                            </label>
-                            <input
-                                id="password"
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="Enter your password"
-                                className="w-full px-4 py-3 border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none transition-colors"
-                                required
-                            />
-                        </div>
-
-                        <Button
-                            type="submit"
-                            disabled={loading || !email || !password}
-                            className="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white py-3 rounded-xl font-semibold shadow-lg shadow-amber-500/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {loading ? 'Logging in...' : 'Login'}
-                        </Button>
-                    </form>
-
-                    <div className="mt-6 text-center">
-                        <p className="text-sm text-[#6B7280]">
-                            Forgot your credentials? <br />
-                            <span className="text-amber-600 font-medium">Contact your institute admin</span>
-                        </p>
                     </div>
-                </div>
 
-                <div className="mt-6 text-center">
-                    <Link to="/" className="text-[#6B7280] hover:text-[#374151] text-sm">
-                        ← Back to Homepage
-                    </Link>
+                    {/* RIGHT IMAGE (Hidden Mobile & Tablet / 50% Desktop) */}
+                    <div className="hidden lg:flex w-1/2 relative overflow-hidden items-center bg-[#EAF2FB]">
+
+                        {/* background shapes */}
+                        <div className="absolute inset-0 opacity-40
+    bg-[radial-gradient(circle_at_25%_30%,#c7d2fe,transparent_45%),
+        radial-gradient(circle_at_80%_70%,#bfdbfe,transparent_45%)]"
+                        />
+
+                        <img
+                            src={studentPortal}
+                            alt="Student Portal"
+                            className="
+absolute
+left-0
+top-1/2
+-translate-y-1/2
+h-[110%]
+max-w-none
+object-contain
+"
+                        />
+                    </div>
+
                 </div>
-            </motion.div>
+            </div>
         </div>
     );
 };

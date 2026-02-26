@@ -48,39 +48,39 @@ export const TestResult = () => {
     const timeTakenSecs = attempt.time_taken ? attempt.time_taken % 60 : 0;
 
     return (
-        <div className="max-w-4xl mx-auto p-6 space-y-6">
+        <div className="max-w-4xl mx-auto px-2 sm:px-4 py-4 space-y-4">
             {/* Result Card */}
-            <div className={`bg-gradient-to-r ${passed ? 'from-green-500 to-emerald-600' : 'from-red-500 to-rose-600'} rounded-2xl shadow-lg p-8 text-white`}>
+            <div className={`bg-gradient-to-r ${passed ? 'from-green-500 to-emerald-600' : 'from-red-500 to-rose-600'} rounded-2xl shadow-lg p-4 sm:p-8 text-white`}>
                 <div className="text-center">
                     {passed ? (
-                        <CheckCircle className="w-20 h-20 mx-auto mb-4" />
+                        <CheckCircle className="w-14 h-14 sm:w-20 sm:h-20 mx-auto mb-3" />
                     ) : (
-                        <XCircle className="w-20 h-20 mx-auto mb-4" />
+                        <XCircle className="w-14 h-14 sm:w-20 sm:h-20 mx-auto mb-3" />
                     )}
-                    <h1 className="text-4xl font-bold mb-2">
+                    <h1 className="text-2xl sm:text-4xl font-bold mb-1">
                         {passed ? 'Congratulations!' : 'Keep Practicing!'}
                     </h1>
-                    <p className="text-xl opacity-90">
+                    <p className="text-base sm:text-xl opacity-90">
                         {passed ? 'You have passed the test!' : 'You can do better next time!'}
                     </p>
                 </div>
 
-                <div className="grid grid-cols-4 gap-6 mt-8">
-                    <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4 text-center">
-                        <p className="text-sm opacity-90 mb-1">Score</p>
-                        <p className="text-3xl font-bold">{attempt.score}/{attempt.total_marks}</p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">
+                    <div className="bg-white/20 backdrop-blur-sm rounded-xl p-3 text-center">
+                        <p className="text-xs opacity-90 mb-1">Score</p>
+                        <p className="text-xl sm:text-3xl font-bold">{attempt.score}/{attempt.total_marks}</p>
                     </div>
-                    <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4 text-center">
-                        <p className="text-sm opacity-90 mb-1">Percentage</p>
-                        <p className="text-3xl font-bold">{attempt.percentage.toFixed(1)}%</p>
+                    <div className="bg-white/20 backdrop-blur-sm rounded-xl p-3 text-center">
+                        <p className="text-xs opacity-90 mb-1">Percentage</p>
+                        <p className="text-xl sm:text-3xl font-bold">{attempt.percentage.toFixed(1)}%</p>
                     </div>
-                    <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4 text-center">
-                        <p className="text-sm opacity-90 mb-1">Accuracy</p>
-                        <p className="text-3xl font-bold">{accuracy}%</p>
+                    <div className="bg-white/20 backdrop-blur-sm rounded-xl p-3 text-center">
+                        <p className="text-xs opacity-90 mb-1">Accuracy</p>
+                        <p className="text-xl sm:text-3xl font-bold">{accuracy}%</p>
                     </div>
-                    <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4 text-center">
-                        <p className="text-sm opacity-90 mb-1">Time Taken</p>
-                        <p className="text-3xl font-bold">{timeTakenMins}:{timeTakenSecs.toString().padStart(2, '0')}</p>
+                    <div className="bg-white/20 backdrop-blur-sm rounded-xl p-3 text-center">
+                        <p className="text-xs opacity-90 mb-1">Time Taken</p>
+                        <p className="text-xl sm:text-3xl font-bold">{timeTakenMins}:{timeTakenSecs.toString().padStart(2, '0')}</p>
                     </div>
                 </div>
             </div>
@@ -105,35 +105,35 @@ export const TestResult = () => {
             </div>
 
             {/* Question-wise Breakdown */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    <FileText className="w-5 h-5 text-indigo-600" />
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3">
+                <h2 className="text-base font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-indigo-600" />
                     Question-wise Analysis
                 </h2>
 
-                <div className="space-y-4">
+                <div className="space-y-2">
                     {questions.map((question, index) => {
                         const studentAnswer = attempt.answers[question.id];
                         const isCorrect = studentAnswer === question.correct_option;
 
                         return (
-                            <div key={question.id} className={`border-2 rounded-lg p-4 ${isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
-                                <div className="flex items-start gap-3 mb-3">
+                            <div key={question.id} className={`border rounded-lg p-2 ${isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
+                                <div className="flex items-start gap-1.5 mb-2">
                                     {isCorrect ? (
-                                        <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
+                                        <CheckCircle className="w-3.5 h-3.5 text-green-600 mt-0.5 shrink-0" />
                                     ) : (
-                                        <XCircle className="w-5 h-5 text-red-600 mt-0.5" />
+                                        <XCircle className="w-3.5 h-3.5 text-red-600 mt-0.5 shrink-0" />
                                     )}
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <span className="bg-white px-2 py-0.5 rounded text-sm font-medium">Q{index + 1}</span>
-                                            <span className="text-xs text-gray-600">{question.marks} {question.marks === 1 ? 'mark' : 'marks'}</span>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-1.5 mb-0.5">
+                                            <span className="bg-white px-1.5 py-0.5 rounded text-[10px] font-medium shrink-0">Q{index + 1}</span>
+                                            <span className="text-[10px] text-gray-500">{question.marks} {question.marks === 1 ? 'mark' : 'marks'}</span>
                                         </div>
-                                        <p className="font-medium text-gray-900">{question.question_text}</p>
+                                        <p className="font-medium text-gray-900 text-xs break-words leading-snug">{question.question_text}</p>
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-2 mb-3">
+                                <div className="grid grid-cols-2 gap-1.5 mb-2">
                                     {['A', 'B', 'C', 'D'].map(option => {
                                         const optionKey = `option_${option.toLowerCase()}` as 'option_a' | 'option_b' | 'option_c' | 'option_d';
                                         const isCorrectOption = option === question.correct_option;
@@ -151,24 +151,24 @@ export const TestResult = () => {
                                         }
 
                                         return (
-                                            <div key={option} className={`p-2 rounded border-2 ${bgColor} ${borderColor} text-sm`}>
-                                                <span className="font-medium">{option}.</span> {question[optionKey]}
-                                                {isCorrectOption && <span className="ml-2 text-green-700 font-medium">✓ Correct</span>}
-                                                {isStudentAnswer && !isCorrect && <span className="ml-2 text-red-700 font-medium">✗ Your answer</span>}
+                                            <div key={option} className={`p-1.5 rounded border ${bgColor} ${borderColor} text-[11px] leading-snug`}>
+                                                <span className="font-semibold">{option}.</span> {question[optionKey]}
+                                                {isCorrectOption && <span className="ml-1 text-green-700 font-medium">✓ Correct</span>}
+                                                {isStudentAnswer && !isCorrect && <span className="ml-1 text-red-700 font-medium">✗ Your answer</span>}
                                             </div>
                                         );
                                     })}
                                 </div>
 
                                 {question.explanation && (
-                                    <div className="bg-white rounded border border-gray-200 p-3 text-sm">
-                                        <p className="font-medium text-gray-700 mb-1">Explanation:</p>
-                                        <p className="text-gray-600">{question.explanation}</p>
+                                    <div className="bg-white rounded border border-gray-200 p-2 text-xs">
+                                        <p className="font-medium text-gray-700 mb-0.5">Explanation:</p>
+                                        <p className="text-gray-600 leading-snug">{question.explanation}</p>
                                     </div>
                                 )}
 
                                 {!studentAnswer && (
-                                    <p className="text-sm text-amber-700 font-medium">⚠ Not attempted</p>
+                                    <p className="text-xs text-amber-700 font-medium">⚠ Not attempted</p>
                                 )}
                             </div>
                         );
