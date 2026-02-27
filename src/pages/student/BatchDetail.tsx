@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, BookOpen, Calendar, Clock, Users, Star, IndianRupee, FileText, Video, File as FileIcon, Download, Eye } from 'lucide-react';
+import { ArrowLeft, CalendarDays, Clock, Users, Star, IndianRupee, FileText, Video, File as FileIcon, Download, Eye, LayoutGrid, VideoIcon, Radio, Hourglass } from 'lucide-react';
 import { downloadFile } from '@/utils/file.utils';
 import { useQueryClient } from '@tanstack/react-query';
 import { useBatch, batchKeys } from '@/hooks/data/useBatches';
@@ -222,47 +222,45 @@ export const BatchDetail = () => {
         <div className="min-h-screen bg-gray-50 pb-20 md:pb-8">
             {/* Header */}
             <div className="bg-white border-b border-gray-200 py-8 px-4">
-                <div className="max-w-7xl mx-auto">
-                    <button
-                        onClick={() => navigate('/student/batches')}
-                        className="flex items-center gap-2 text-gray-500 hover:text-indigo-600 mb-6 transition-colors group"
-                    >
-                        <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-                        <span className="text-sm font-medium">Back to Batches</span>
-                    </button>
+                <button
+                    onClick={() => navigate('/student/batches')}
+                    className="flex items-center gap-2 text-gray-500 hover:text-indigo-600 mb-6 transition-colors group"
+                >
+                    <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                    <span className="text-sm font-medium">Back to Batches</span>
+                </button>
 
-                    <motion.div
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5 }}
-                    >
-                        {/* Batch Info */}
-                        <div className="flex flex-col">
-                            <div className="flex items-center gap-2 mb-4">
-                                <span className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
-                                    {batch.examGoal}
+                <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                >
+                    {/* Batch Info */}
+                    <div className="flex flex-col">
+                        <div className="flex items-center gap-2 mb-4">
+                            <span className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+                                {batch.examGoal}
+                            </span>
+                            {batch.isPurchased && (
+                                <span className="bg-emerald-50 text-emerald-700 border border-emerald-100 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                    Enrolled
                                 </span>
-                                {batch.isPurchased && (
-                                    <span className="bg-emerald-50 text-emerald-700 border border-emerald-100 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                        Enrolled
-                                    </span>
-                                )}
-                            </div>
-
-                            <h1 className="text-3xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">
-                                {batch.title}
-                            </h1>
-                            <p className="text-gray-600 text-lg max-w-3xl leading-relaxed">
-                                {batch.description}
-                            </p>
+                            )}
                         </div>
-                    </motion.div>
-                </div>
+
+                        <h1 className="text-3xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">
+                            {batch.title}
+                        </h1>
+                        <p className="text-gray-600 text-lg max-w-3xl leading-relaxed">
+                            {batch.description}
+                        </p>
+                    </div>
+                </motion.div>
             </div>
 
             {/* View Toggle */}
-            <div className="max-w-7xl mx-auto px-4 mt-6">
+            <div className="px-4 mt-6">
                 <div className="bg-white rounded-xl shadow-sm p-1 inline-flex">
                     <button
                         onClick={() => setView('classes')}
@@ -286,55 +284,50 @@ export const BatchDetail = () => {
             </div>
 
             {/* Content Section */}
-            <div className="max-w-7xl mx-auto px-4 py-6">
+            <div className="px-4 py-6">
                 {view === 'classes' ? (
                     <>
                         {/* Filter Tabs */}
-                        <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
-                            <div className="flex items-center gap-2 mb-3">
-                                <Calendar className="w-5 h-5 text-gray-600" />
-                                <h2 className="text-lg font-semibold text-gray-900">Class Schedule</h2>
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-6">
+                            <div className="flex items-center justify-between mb-5">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-9 h-9 bg-indigo-50 rounded-xl flex items-center justify-center">
+                                        <CalendarDays className="w-5 h-5 text-indigo-600" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-base font-bold text-gray-900 leading-none">Class Schedule</h2>
+                                        <p className="text-xs text-gray-400 mt-0.5">{classes.length} total classes</p>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div className="flex flex-wrap gap-2">
-                                <button
-                                    onClick={() => setFilter('all')}
-                                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filter === 'all'
-                                        ? 'bg-indigo-600 text-white'
-                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                        }`}
-                                >
-                                    All ({classes.length})
-                                </button>
-                                <button
-                                    onClick={() => setFilter('recorded')}
-                                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filter === 'recorded'
-                                        ? 'bg-indigo-600 text-white'
-                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                        }`}
-                                >
-                                    Recorded ({classes.filter(c => c.type === 'recorded').length})
-                                </button>
-                                <button
-                                    onClick={() => setFilter('live')}
-                                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filter === 'live'
-                                        ? 'bg-red-600 text-white'
-                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                        }`}
-                                >
-                                    🔴 Live ({classes.filter(c => c.type === 'live').length})
-                                </button>
-                                <button
-                                    onClick={() => setFilter('upcoming')}
-                                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filter === 'upcoming'
-                                        ? 'bg-gray-600 text-white'
-                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                        }`}
-                                >
-                                    Upcoming ({classes.filter(c => c.type === 'upcoming').length})
-                                </button>
+                            <div className="flex flex-wrap gap-2.5">
+                                {([
+                                    { key: 'all' as const, label: 'All', Icon: LayoutGrid, count: classes.length, activeGrad: 'from-indigo-500 to-indigo-600', activeShadow: 'shadow-indigo-200/60', badgeBg: 'bg-indigo-50 text-indigo-600', hoverBorder: 'hover:border-indigo-300 hover:text-indigo-700 hover:bg-indigo-50' },
+                                    { key: 'recorded' as const, label: 'Recorded', Icon: VideoIcon, count: classes.filter(c => c.type === 'recorded').length, activeGrad: 'from-violet-500 to-purple-600', activeShadow: 'shadow-violet-200/60', badgeBg: 'bg-violet-50 text-violet-600', hoverBorder: 'hover:border-violet-300 hover:text-violet-700 hover:bg-violet-50' },
+                                    { key: 'live' as const, label: 'Live', Icon: Radio, count: classes.filter(c => c.type === 'live').length, activeGrad: 'from-rose-500 to-red-500', activeShadow: 'shadow-rose-200/60', badgeBg: 'bg-rose-50 text-rose-600', hoverBorder: 'hover:border-rose-300 hover:text-rose-600 hover:bg-rose-50' },
+                                    { key: 'upcoming' as const, label: 'Upcoming', Icon: Hourglass, count: classes.filter(c => c.type === 'upcoming').length, activeGrad: 'from-amber-400 to-orange-500', activeShadow: 'shadow-amber-200/60', badgeBg: 'bg-amber-50 text-amber-600', hoverBorder: 'hover:border-amber-300 hover:text-amber-700 hover:bg-amber-50' },
+                                ]).map(({ key, label, Icon, count, activeGrad, activeShadow, badgeBg, hoverBorder }) => {
+                                    const isActive = filter === key;
+                                    return (
+                                        <button
+                                            key={key}
+                                            onClick={() => setFilter(key)}
+                                            className={`relative inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all duration-200 select-none ${isActive
+                                                    ? `bg-gradient-to-r ${activeGrad} text-white border-transparent shadow-lg ${activeShadow} -translate-y-0.5`
+                                                    : `bg-white text-gray-500 border-gray-200 ${hoverBorder} hover:-translate-y-px hover:shadow-sm`
+                                                }`}
+                                        >
+                                            <Icon className="w-4 h-4 flex-shrink-0" />
+                                            <span>{label}</span>
+                                            <span className={`inline-flex items-center justify-center min-w-[22px] h-5 px-1.5 rounded-full text-xs font-bold ${isActive ? 'bg-white/25 text-white' : badgeBg
+                                                }`}>{count}</span>
+                                        </button>
+                                    );
+                                })}
                             </div>
                         </div>
+
 
                         {/* Classes List */}
                         {filteredClasses.length > 0 ? (

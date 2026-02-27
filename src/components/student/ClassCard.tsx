@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Clock, Play, Radio, Lock as LockIcon, CheckCircle, Calendar } from 'lucide-react';
+import { Clock, Play, Radio, Lock as LockIcon, CheckCircle, CalendarDays } from 'lucide-react';
 import { format } from 'date-fns';
 
 export interface ClassCardData {
@@ -83,7 +83,7 @@ export const ClassCard = ({ classData, onClick, index = 0 }: ClassCardProps) => 
                     {/* Meta Info */}
                     <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
                         <span className="flex items-center gap-1.5">
-                            <Calendar className="w-3.5 h-3.5 text-blue-500" />
+                            <CalendarDays className="w-3.5 h-3.5 text-blue-500" />
                             {format(new Date(classData.date), 'MMM dd, yyyy')}
                         </span>
                         {(classData.type === 'live' || classData.type === 'upcoming') && classData.startTime && (
@@ -102,14 +102,13 @@ export const ClassCard = ({ classData, onClick, index = 0 }: ClassCardProps) => 
                         const now = Date.now();
                         const hasStarted = now >= scheduledTime || classData.type === 'live';
                         return (
-                            <button 
+                            <button
                                 disabled={!hasStarted}
                                 onClick={hasStarted ? onClick : undefined}
-                                className={`px-5 py-2 rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 ${
-                                    hasStarted 
-                                        ? 'bg-red-500 text-white hover:bg-red-600 cursor-pointer' 
-                                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                }`}
+                                className={`px-5 py-2 rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 ${hasStarted
+                                    ? 'bg-red-500 text-white hover:bg-red-600 cursor-pointer'
+                                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    }`}
                             >
                                 {!hasStarted && <LockIcon className="w-4 h-4" />}
                                 {hasStarted ? 'Join Live' : 'Locked'}
