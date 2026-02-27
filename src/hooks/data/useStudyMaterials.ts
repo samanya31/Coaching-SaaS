@@ -99,6 +99,22 @@ export const useDeleteStudyMaterial = () => {
 
     return useMutation({
         mutationFn: async (id: string) => {
+            // 1. Fetch file_url before deleting so we can clean up R2
+            const { data } = await supabase
+                .from('study_materials')
+                .select('file_url')
+                .eq('id', id)
+                .single();
+
+            // 2. Delete from R2 + media_files (best-effort)
+            if (data?.file_url) {
+                const r2 = (await import('@/services/r2.service')).default;
+                await r2.remove(data.file_url).catch(err => {
+                    console.warn('Could not remove study material from R2:', err);
+                });
+            }
+
+            // 3. Delete from DB
             const { error } = await supabase
                 .from('study_materials')
                 .delete()
@@ -111,6 +127,7 @@ export const useDeleteStudyMaterial = () => {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['study-materials'] });
+            queryClient.invalidateQueries({ queryKey: ['superadmin-storage'] });
         }
     });
 };
@@ -154,7 +171,7 @@ export const useAllStudentStudyMaterials = () => {
                 .order('created_at', { ascending: false });
 
             // Query B: Enrolled Batch Materials
-            let enrolledQuery: Promise<any> = Promise.resolve({ data: [] });
+            let enrolledQuery: any = Promise.resolve({ data: [] });
             if (batchIds.length > 0) {
                 enrolledQuery = supabase
                     .from('study_materials')

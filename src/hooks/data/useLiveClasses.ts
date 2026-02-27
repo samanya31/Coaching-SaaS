@@ -186,7 +186,7 @@ export function useUpdateLiveClass() {
 }
 
 /**
- * Delete a live class (soft delete by setting status)
+ * Delete a live class (hard delete)
  */
 export function useDeleteLiveClass() {
     const queryClient = useQueryClient();
@@ -194,15 +194,13 @@ export function useDeleteLiveClass() {
 
     return useMutation({
         mutationFn: async (classId: string) => {
-            const { data, error } = await supabase
+            const { error } = await supabase
                 .from('live_classes')
-                .update({ status: 'cancelled' })
-                .eq('id', classId)
-                .select()
-                .single();
+                .delete()
+                .eq('id', classId);
 
             if (error) throw error;
-            return data as LiveClass;
+            return classId; // Return ID so onSuccess knows what was deleted if needed
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: liveClassKeys.all(coachingId!) });
