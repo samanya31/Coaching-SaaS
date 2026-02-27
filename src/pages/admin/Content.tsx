@@ -1,18 +1,22 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Search, Filter, Grid3x3, List, Eye, Edit2, Trash2, Video, Clock, Eye as EyeIcon, Calendar, PlayCircle } from 'lucide-react';
+import { Plus, Search, Filter, Grid3x3, List, Edit2, Trash2, Video, Clock, Eye as EyeIcon, Calendar, PlayCircle, AlertTriangle, Loader2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCourses, useDeleteCourse } from '@/hooks/data/useCourses';
+import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
 
 const subjects = ['All', 'Physics', 'Chemistry', 'Mathematics', 'Biology', 'General', 'Reasoning'];
 
 export const Content = () => {
     const { data: coursesData = [], isLoading } = useCourses();
-    const { mutate: deleteCourse } = useDeleteCourse();
+    const { mutateAsync: deleteCourse } = useDeleteCourse();
 
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedSubject, setSelectedSubject] = useState('All');
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+    const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     // Filter courses
     const filteredCourses = coursesData.filter(course => {
@@ -22,9 +26,17 @@ export const Content = () => {
         return matchesSearch && matchesSubject;
     });
 
-    const handleDelete = (id: string) => {
-        if (confirm('Are you sure you want to delete this course?')) {
-            deleteCourse(id);
+    const handleDeleteConfirm = async () => {
+        if (!deleteTarget) return;
+        setIsDeleting(true);
+        try {
+            await deleteCourse(deleteTarget.id);
+            toast.success(`"${deleteTarget.title}" deleted. R2 storage freed.`);
+        } catch (err: any) {
+            toast.error('Delete failed: ' + (err.message || 'Unknown error'));
+        } finally {
+            setIsDeleting(false);
+            setDeleteTarget(null);
         }
     };
 
@@ -216,7 +228,7 @@ export const Content = () => {
                                         </Button>
                                     </Link>
                                     <button
-                                        onClick={() => handleDelete(course.id)}
+                                        onClick={() => setDeleteTarget({ id: course.id, title: course.title })}
                                         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-100"
                                     >
                                         <Trash2 className="w-4 h-4" />
@@ -305,7 +317,7 @@ export const Content = () => {
                                                     </button>
                                                 </Link>
                                                 <button
-                                                    onClick={() => handleDelete(course.id)}
+                                                    onClick={() => setDeleteTarget({ id: course.id, title: course.title })}
                                                     className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
@@ -319,6 +331,56 @@ export const Content = () => {
                     </div>
                 </div>
             )}
+
+            {/* Delete Confirmation Modal */}
+            <AnimatePresence>
+                {deleteTarget && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => !isDeleting && setDeleteTarget(null)} />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6"
+                        >
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="p-2.5 bg-red-100 rounded-xl">
+                                    <AlertTriangle className="w-5 h-5 text-red-600" />
+                                </div>
+                                <h3 className="text-lg font-bold text-gray-900">Delete Video?</h3>
+                            </div>
+                            <p className="text-sm text-gray-600 mb-2">
+                                <span className="font-semibold text-gray-800">"{deleteTarget.title}"</span> will be permanently deleted.
+                            </p>
+                            <p className="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2 mb-5 flex items-center gap-1.5">
+                                <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
+                                The video file will also be deleted from R2 storage. This cannot be undone.
+                            </p>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setDeleteTarget(null)}
+                                    disabled={isDeleting}
+                                    className="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleDeleteConfirm}
+                                    disabled={isDeleting}
+                                    className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-60"
+                                >
+                                    {isDeleting ? (
+                                        <><Loader2 className="w-4 h-4 animate-spin" /> Deleting...</>
+                                    ) : (
+                                        <><Trash2 className="w-4 h-4" /> Delete Forever</>
+                                    )}
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };
+

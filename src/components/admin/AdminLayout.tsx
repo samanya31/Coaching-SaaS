@@ -18,24 +18,26 @@ import {
     Search,
     Image,
     Radio,
-    Ticket
+    Ticket,
+    Lock,
+    Crown,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { usePlanFeatures } from '@/hooks/data/usePlan';
 
-// Define sidebar items with role-based permissions
-// Three roles: coaching_admin (full access), staff (students + instructors), teacher (batches + tests)
+// planFeature: key from usePlanFeatures — undefined = always allowed
 const allSidebarItems = [
-    { path: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard', requiredRoles: ['coaching_admin', 'super_admin'] },
-    { path: '/admin/dashboard/students', icon: Users, label: 'Students', requiredRoles: ['staff', 'coaching_admin', 'super_admin'] },
-    { path: '/admin/dashboard/batches', icon: GraduationCap, label: 'Batches', requiredRoles: ['teacher', 'coaching_admin', 'super_admin'] },
-    { path: '/admin/dashboard/website', icon: Image, label: 'Website', requiredRoles: ['coaching_admin', 'super_admin'] },
-    { path: '/admin/dashboard/tests', icon: FileText, label: 'Tests', requiredRoles: ['teacher', 'coaching_admin', 'super_admin'] },
-    { path: '/admin/dashboard/payments', icon: IndianRupee, label: 'Finance', requiredRoles: ['coaching_admin', 'super_admin'] },
-    { path: '/admin/dashboard/announcements', icon: Megaphone, label: 'Announcements', requiredRoles: ['teacher', 'coaching_admin', 'super_admin'] },
-    { path: '/admin/dashboard/reports', icon: BarChart3, label: 'Reports', requiredRoles: ['coaching_admin', 'super_admin'] },
-    { path: '/admin/dashboard/instructors', icon: UserCog, label: 'Instructors', requiredRoles: ['staff', 'coaching_admin', 'super_admin'] },
-    { path: '/admin/dashboard/support-tickets', icon: Ticket, label: 'Support Tickets', requiredRoles: ['coaching_admin', 'super_admin'] },
-    { path: '/admin/dashboard/settings', icon: Settings, label: 'Settings', requiredRoles: ['coaching_admin', 'super_admin'] }
+    { path: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard', requiredRoles: ['coaching_admin', 'super_admin'], planFeature: undefined },
+    { path: '/admin/dashboard/students', icon: Users, label: 'Students', requiredRoles: ['staff', 'coaching_admin', 'super_admin'], planFeature: undefined },
+    { path: '/admin/dashboard/batches', icon: GraduationCap, label: 'Batches', requiredRoles: ['teacher', 'coaching_admin', 'super_admin'], planFeature: undefined },
+    { path: '/admin/dashboard/website', icon: Image, label: 'Website', requiredRoles: ['coaching_admin', 'super_admin'], planFeature: undefined },
+    { path: '/admin/dashboard/tests', icon: FileText, label: 'Tests', requiredRoles: ['teacher', 'coaching_admin', 'super_admin'], planFeature: 'canUseTests' as const },
+    { path: '/admin/dashboard/payments', icon: IndianRupee, label: 'Finance', requiredRoles: ['coaching_admin', 'super_admin'], planFeature: 'canUsePayments' as const },
+    { path: '/admin/dashboard/announcements', icon: Megaphone, label: 'Announcements', requiredRoles: ['teacher', 'coaching_admin', 'super_admin'], planFeature: undefined },
+    { path: '/admin/dashboard/reports', icon: BarChart3, label: 'Reports', requiredRoles: ['coaching_admin', 'super_admin'], planFeature: undefined },
+    { path: '/admin/dashboard/instructors', icon: UserCog, label: 'Instructors', requiredRoles: ['staff', 'coaching_admin', 'super_admin'], planFeature: undefined },
+    { path: '/admin/dashboard/support-tickets', icon: Ticket, label: 'Support Tickets', requiredRoles: ['coaching_admin', 'super_admin'], planFeature: undefined },
+    { path: '/admin/dashboard/settings', icon: Settings, label: 'Settings', requiredRoles: ['coaching_admin', 'super_admin'], planFeature: undefined },
 ];
 
 export const AdminLayout = () => {
@@ -46,6 +48,10 @@ export const AdminLayout = () => {
     // Get current user from localStorage
     const adminUser = JSON.parse(localStorage.getItem('adminUser') || '{}');
     const userRole = adminUser.role || 'teacher';
+    const coachingId = adminUser.coachingId || null;
+
+    // Plan feature flags — real enforcement
+    const planFeatures = usePlanFeatures(coachingId);
 
     // Filter sidebar items based on user role
     const sidebarItems = allSidebarItems.filter(item =>
@@ -86,10 +92,38 @@ export const AdminLayout = () => {
                     </div>
                 </div>
 
+                {/* Plan Badge */}
+                {planFeatures.plan && (
+                    <div className="px-4 pb-2">
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 rounded-lg">
+                            <Crown className="w-3 h-3 text-indigo-500" />
+                            <span className="text-xs font-semibold text-indigo-700">{planFeatures.planName} Plan</span>
+                        </div>
+                    </div>
+                )}
+
                 {/* Navigation */}
                 <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
                     {sidebarItems.map((item) => {
                         const isActive = location.pathname === item.path;
+                        const isLocked = item.planFeature
+                            ? !planFeatures[item.planFeature as keyof typeof planFeatures]
+                            : false;
+
+                        if (isLocked) {
+                            return (
+                                <div
+                                    key={item.path}
+                                    title={`Upgrade to unlock ${item.label}`}
+                                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 cursor-not-allowed select-none"
+                                >
+                                    <item.icon className="w-5 h-5 text-gray-300" />
+                                    <span className="font-medium flex-1">{item.label}</span>
+                                    <Lock className="w-3 h-3 text-gray-300" />
+                                </div>
+                            );
+                        }
+
                         return (
                             <Link
                                 key={item.path}
@@ -117,6 +151,7 @@ export const AdminLayout = () => {
                     </button>
                 </div>
             </aside>
+
 
             {/* Mobile Sidebar */}
             {isSidebarOpen && (

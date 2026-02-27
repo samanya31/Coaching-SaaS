@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { useAndroidBackButton } from "@/hooks/useAndroidBackButton";
 import NotFound from "./pages/NotFound";
 
@@ -29,6 +29,15 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ExamGoalProvider } from "./contexts/ExamGoalContext";
 import { MobileRedirect } from "./components/MobileRedirect";
 import { TenantProvider } from "./app/providers/TenantProvider";
+import { SuperAdminAuthProvider } from "./contexts/SuperAdminAuthContext";
+import { SuperAdminRoute } from "./components/superadmin/SuperAdminRoute";
+import { SuperAdminLayout } from "./components/superadmin/SuperAdminLayout";
+import { SuperAdminLogin } from "./pages/superadmin/Login";
+import { SuperAdminDashboard } from "./pages/superadmin/Dashboard";
+import { SuperAdminInstitutes } from "./pages/superadmin/Institutes";
+import { SuperAdminPlans } from "./pages/superadmin/Plans";
+import { SuperAdminFinance } from "./pages/superadmin/Finance";
+import { SuperAdminStorage } from "./pages/superadmin/Storage";
 
 // Admin Portal
 import { AdminLayout } from "./components/admin/AdminLayout";
@@ -122,6 +131,23 @@ const App = () => (
                 <VideoPlayerPage />
               </TenantProvider>
             } />
+
+            {/* ── Super Admin Portal ── */}
+            <Route
+              path="/superadmin"
+              element={<SuperAdminAuthProvider><Outlet /></SuperAdminAuthProvider>}
+            >
+              <Route path="login" element={<SuperAdminLogin />} />
+              <Route element={<SuperAdminRoute />}>
+                <Route path="dashboard" element={<SuperAdminLayout />}>
+                  <Route index element={<SuperAdminDashboard />} />
+                  <Route path="institutes" element={<SuperAdminInstitutes />} />
+                  <Route path="plans" element={<SuperAdminPlans />} />
+                  <Route path="billing" element={<SuperAdminFinance />} />
+                  <Route path="storage" element={<SuperAdminStorage />} />
+                </Route>
+              </Route>
+            </Route>
 
             {/* Admin Portal Routes */}
             <Route path="/admin/login" element={

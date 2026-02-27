@@ -157,146 +157,155 @@ export const AdminLogin = () => {
     };
 
     return (
-        <div className="min-h-screen flex">
-            {/* Left Side - Branding */}
-            <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 p-12 flex-col justify-between relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-                <div className="absolute bottom-0 left-0 w-72 h-72 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
+        <div className="relative min-h-screen overflow-hidden font-sans text-gray-100">
+            {/* ===== PAGE BACKGROUND SPLIT ===== */}
+            <div className="absolute inset-0 flex flex-col lg:flex-row">
+                {/* LEFT DARK HALF */}
+                <div className="w-full lg:w-1/2 h-full bg-[#0B0E13]" />
 
-                <div className="relative z-10">
-                    <div className="flex items-center gap-3 mb-8">
-                        <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                            <Shield className="w-7 h-7 text-white" />
-                        </div>
-                        <div>
-                            <h1 className="text-2xl font-bold text-white">ExamEdge</h1>
-                            <p className="text-white/80 text-sm">Admin Portal</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="relative z-10">
-                    <h2 className="text-4xl font-bold text-white mb-4">Manage Your Institution</h2>
-                    <p className="text-white/90 text-lg mb-8">
-                        Comprehensive admin dashboard to manage students, courses, instructors, and analytics.
-                    </p>
-                    <div className="space-y-4">
-                        {[
-                            { title: 'Student Management', desc: 'Track enrollment, performance, and engagement' },
-                            { title: 'Content & Course Control', desc: 'Manage batches, live classes, and study materials' },
-                            { title: 'Reports & Analytics', desc: 'Real-time insights and performance metrics' },
-                        ].map((item) => (
-                            <div key={item.title} className="flex items-start gap-3 text-white/90">
-                                <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <span className="text-white text-sm">✓</span>
-                                </div>
-                                <div>
-                                    <p className="font-semibold">{item.title}</p>
-                                    <p className="text-sm text-white/70">{item.desc}</p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                <div className="relative z-10">
-                    <p className="text-white/60 text-sm">© 2024 ExamEdge Academy. All rights reserved.</p>
-                </div>
+                {/* RIGHT BLUE HALF */}
+                <div className="hidden lg:block lg:w-1/2 h-full bg-[#6188FC]" />
             </div>
 
-            {/* Right Side - Login Form */}
-            <div className="flex-1 flex items-center justify-center p-8 bg-gray-50">
-                <div className="w-full max-w-md">
-                    {/* Mobile Logo */}
-                    <div className="lg:hidden mb-8 text-center">
-                        <div className="inline-flex items-center gap-2 mb-2">
-                            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center">
-                                <Shield className="w-6 h-6 text-white" />
-                            </div>
-                            <h1 className="text-2xl font-bold text-gray-900">ExamEdge</h1>
+            {/* ===== CENTER FLOATING CARD ===== */}
+            <div className="relative min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8">
+
+                <div className="
+                    w-full
+                    max-w-[1400px]
+                    h-auto
+                    lg:h-[85vh]
+                    min-h-[600px]
+                    bg-[#151821]
+                    rounded-3xl
+                    shadow-[0_40px_80px_rgba(0,0,0,0.5)]
+                    overflow-hidden
+                    flex
+                    flex-col
+                    lg:flex-row
+                    lg:border-none
+                    border
+                    border-gray-800
+                ">
+
+                    {/* LEFT LOGIN (100% Mobile/Tablet / 50% Desktop) */}
+                    <div className="w-full lg:w-1/2 flex flex-col pt-0 lg:pt-12 p-8 sm:p-12 lg:px-16 pb-12 overflow-y-auto">
+
+                        {/* Mobile Box Image */}
+                        <div className="w-[calc(100%+4rem)] -mx-8 sm:-mx-12 h-64 lg:hidden relative shrink-0 -mt-8 sm:-mt-12 bg-[#0B0A1C] overflow-hidden mb-8">
+                            {/* Subtle light flares for depth */}
+                            <div className="absolute top-0 right-0 w-48 h-48 bg-[#6188FC]/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+
+                            <img
+                                src="/src/assets/admin_portal_res.png"
+                                alt="Admin Portal"
+                                className="w-full h-full object-cover object-center relative z-10"
+                            />
+                            {/* Dark Gradient Overlay for smooth transition into the form */}
+                            <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#151821] to-transparent z-20"></div>
                         </div>
-                        <p className="text-gray-600">Admin Portal</p>
+
+                        <div className="w-full max-w-[380px] mx-auto flex flex-col justify-center h-full">
+                            {/* Header */}
+                            <div className="mb-10 text-left">
+                                <h2 className="text-[32px] font-bold text-white mb-2 tracking-wide">Login</h2>
+                                <p className="text-[#8B8D97] text-[14px]">Enter your account details</p>
+                            </div>
+
+                            {error && (
+                                <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3">
+                                    <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                                    <div>
+                                        <p className="text-red-400 text-sm mt-0.5">{error}</p>
+                                    </div>
+                                </div>
+                            )}
+
+                            <form onSubmit={handleLogin} className="space-y-5">
+                                <div className="space-y-1">
+                                    <div className="relative group">
+                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#6B6D77] transition-colors group-focus-within:text-[#6188FC]">
+                                            <Mail className="h-5 w-5" />
+                                        </div>
+                                        <input
+                                            type="email"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            placeholder="Username"
+                                            required
+                                            className="block w-full pl-11 pr-4 py-3.5 border border-[#2A2C35] rounded-[14px] text-white placeholder-[#6B6D77] focus:outline-none focus:border-[#6188FC] focus:ring-1 focus:ring-[#6188FC]/30 transition-all bg-[#1A1D27] text-[15px]"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-1">
+                                    <div className="relative group">
+                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#6B6D77] transition-colors group-focus-within:text-[#6188FC]">
+                                            <Lock className="h-5 w-5" />
+                                        </div>
+                                        <input
+                                            type={showPassword ? 'text' : 'password'}
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            placeholder="Password"
+                                            required
+                                            className="block w-full pl-11 pr-12 py-3.5 border border-[#2A2C35] rounded-[14px] text-white placeholder-[#6B6D77] focus:outline-none focus:border-[#6188FC] focus:ring-1 focus:ring-[#6188FC]/30 transition-all bg-[#1A1D27] text-[15px]"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-[#6B6D77] hover:text-gray-300 transition-colors focus:outline-none"
+                                        >
+                                            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-start pt-1 pb-3">
+                                    <a href="#" className="text-[13px] text-[#6188FC] hover:text-[#7B9FFF] transition-colors">
+                                        Forgot Password?
+                                    </a>
+                                </div>
+
+                                <Button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="w-full bg-gradient-to-r from-[#7B61FF] to-[#3B82F6] hover:opacity-90 text-white rounded-[14px] py-6 text-[16px] font-semibold transition-all shadow-none mt-2 border-0"
+                                >
+                                    {loading ? (
+                                        <div className="flex items-center justify-center gap-2">
+                                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                        </div>
+                                    ) : (
+                                        'Login'
+                                    )}
+                                </Button>
+                            </form>
+                        </div>
                     </div>
 
-                    <div className="bg-white rounded-2xl shadow-xl p-8">
-                        <div className="mb-8">
-                            <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h2>
-                            <p className="text-gray-600">Sign in to access your admin dashboard</p>
-                        </div>
+                    {/* RIGHT IMAGE (Hidden Mobile & Tablet / 50% Desktop) */}
+                    <div className="hidden lg:flex w-1/2 relative overflow-hidden items-center justify-center bg-[#6188FC]">
+                        {/* Subtle light flares for depth */}
+                        <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                        <div className="absolute bottom-0 left-0 w-96 h-96 bg-white/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
 
-                        {error && (
-                            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-                                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                                <div>
-                                    <p className="text-red-800 font-medium">Login Failed</p>
-                                    <p className="text-red-700 text-sm">{error}</p>
-                                </div>
-                            </div>
-                        )}
-
-                        <form onSubmit={handleLogin} className="space-y-6">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-                                <div className="relative">
-                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                                    <input
-                                        type="email"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        placeholder="admin@examedge.com"
-                                        required
-                                        className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
-                                    />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                                <div className="relative">
-                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                                    <input
-                                        type={showPassword ? 'text' : 'password'}
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        placeholder="Enter your password"
-                                        required
-                                        className="w-full pl-11 pr-12 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                                    >
-                                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                                    </button>
-                                </div>
-                            </div>
-
-                            <Button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white py-3 text-base font-semibold"
-                            >
-                                {loading ? (
-                                    <div className="flex items-center justify-center gap-2">
-                                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                        Signing in...
-                                    </div>
-                                ) : (
-                                    'Sign In'
-                                )}
-                            </Button>
-                        </form>
-
-                        {/* Test Credentials hint */}
-                        <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                            <p className="text-sm font-medium text-blue-900 mb-1">Test Credentials:</p>
-                            <p className="text-sm text-blue-800"><strong>Email:</strong> admin@demo.com | <strong>Password:</strong> Demo123!@</p>
-                        </div>
-
-                        <div className="mt-4 text-center">
-                            <p className="text-sm text-gray-500">🔒 Secured with bcrypt encryption</p>
-                        </div>
+                        {/* Actual Image */}
+                        <img
+                            src="/src/assets/admin_portal.png"
+                            alt="Admin Portal Dashboard"
+                            className="
+    absolute
+    left-0
+    top-1/2
+    -translate-y-1/2
+    h-[110%]
+    max-w-none
+    object-contain
+    drop-shadow-2xl
+    z-10
+  "
+                        />
                     </div>
                 </div>
             </div>

@@ -39,11 +39,18 @@ export const StudentForm = () => {
         reader.readAsDataURL(file);
     };
 
-    const uploadAvatarForUser = async (userId: string): Promise<string | null> => {
+    const uploadAvatarForUser = async (userId: string, oldAvatarUrl?: string | null): Promise<string | null> => {
         if (!avatarFile || !coachingId) return null;
         setIsUploadingAvatar(true);
         try {
-            // Upload to R2: institutes/{coachingId}/avatars/{userId}/{uuid}-{filename}
+            // Delete the old avatar from R2 + media_files first (best-effort)
+            if (oldAvatarUrl) {
+                r2.remove(oldAvatarUrl).catch(() => {
+                    // Non-critical: log but don't block the upload
+                    console.warn('[StudentForm] Could not delete old avatar from R2:', oldAvatarUrl);
+                });
+            }
+            // Upload new avatar to R2: institutes/{coachingId}/avatars/{userId}/{uuid}-{filename}
             return await r2.upload(coachingId, 'avatars', avatarFile, { subFolder: userId });
         } catch (err: any) {
             toast.error('Photo upload failed: ' + err.message);
@@ -52,6 +59,7 @@ export const StudentForm = () => {
             setIsUploadingAvatar(false);
         }
     };
+
 
     const [formData, setFormData] = useState({
         name: '',
@@ -173,9 +181,9 @@ export const StudentForm = () => {
                     userId: id,
                     updates: studentData
                 });
-                // Also upload avatar if changed
+                // Upload new avatar — delete old one from R2 first
                 if (avatarFile) {
-                    const avatarUrl = await uploadAvatarForUser(id!);
+                    const avatarUrl = await uploadAvatarForUser(id!, existingStudent?.avatar_url);
                     if (avatarUrl) {
                         await supabase.from('users').update({ avatar_url: avatarUrl }).eq('id', id!);
                     }

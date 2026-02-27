@@ -129,19 +129,42 @@ export function useUpdateCourse() {
 }
 
 /**
- * Delete a course (soft delete)
+ * Delete a course — also cleans up R2 files and media_files records.
  */
 export function useDeleteCourse() {
     const queryClient = useQueryClient();
     const { coachingId } = useTenant();
 
     return useMutation({
-        mutationFn: (courseId: string) => courseService.deleteCourse(courseId),
+        mutationFn: async (courseId: string) => {
+            // 1. Fetch all content media URLs for this course so we can delete from R2
+            const { supabase } = await import('@/config/supabase');
+            const { data: contentRows } = await supabase
+                .from('course_content')
+                .select('media_url')
+                .eq('course_id', courseId)
+                .not('media_url', 'is', null);
+
+            // 2. Delete each file from R2 + media_files (non-blocking, best-effort)
+            const r2 = (await import('@/services/r2.service')).default;
+            if (contentRows?.length) {
+                await Promise.allSettled(
+                    contentRows
+                        .filter((c: any) => c.media_url)
+                        .map((c: any) => r2.remove(c.media_url))
+                );
+            }
+
+            // 3. Delete the course (cascades to course_content via FK)
+            return courseService.deleteCourse(courseId);
+        },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: courseKeys.all(coachingId!) });
+            queryClient.invalidateQueries({ queryKey: ['superadmin-storage'] });
         },
     });
 }
+
 
 /**
  * Create course content
