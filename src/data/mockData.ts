@@ -320,7 +320,7 @@ export const achievements = [
     rank: "AIR 15",
     exam: "UPSC CSE 2023",
     image: "https://images.unsplash.com/photo-1544717305-2782549b5136?w=400&h=400&fit=crop",
-    quote: "Exam Edge's mentorship was crucial in my success journey."
+    quote: "Vidya Yantra's mentorship was crucial in my success journey."
   },
   {
     id: 2,

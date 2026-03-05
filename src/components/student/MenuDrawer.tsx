@@ -4,7 +4,7 @@ import { X, User, Settings, HelpCircle, LogOut, FolderOpen, GraduationCap, Home,
 import { useAuth } from '@/contexts/AuthContext';
 import { useTenant } from '@/app/providers/TenantProvider';
 import { Button } from '@/components/ui/button';
-import defaultAvatar from '@/assets/student-avatar.png';
+import { ASSETS } from '@/config/assets';
 
 const menuItems = [
     { path: '/student/dashboard', icon: Home, label: 'Dashboard' },
@@ -62,7 +62,7 @@ export const MenuDrawer = ({ isOpen, onClose }: MenuDrawerProps) => {
                                 <div>
                                     <div className="w-16 h-16 rounded-full border border-slate-200 bg-slate-50 overflow-hidden flex items-center justify-center mb-3">
                                         <img
-                                            src={user?.avatar_url || defaultAvatar}
+                                            src={user?.avatar_url || ASSETS.studentAvatar}
                                             alt={user?.name || 'Student'}
                                             className="w-full h-full object-cover"
                                         />

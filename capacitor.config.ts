@@ -2,7 +2,7 @@ import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.examedge.student',
-  appName: 'Exam Edge Student',
+  appName: 'Vidya Yantra Student',
   webDir: 'dist',
   server: {
     androidScheme: 'https',

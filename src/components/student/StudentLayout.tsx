@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { ASSETS } from '@/config/assets';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import {
     Home,
@@ -19,7 +20,7 @@ import { BottomNavigation } from './BottomNavigation';
 import { MenuDrawer } from './MenuDrawer';
 import { ExamGoalSelectorModal, ExamGoalButton } from '@/components/ExamGoalSelector';
 import { useExamGoal } from '@/contexts/ExamGoalContext';
-import defaultAvatar from '@/assets/student-avatar.png';
+
 
 // Fallback logo asset - Removed missing NSDLOGO.png
 // import nsdLogo from '@/assets/NSDLOGO.png';
@@ -47,7 +48,7 @@ export const StudentLayout = () => {
     // Dynamic branding from admin settings
     const primaryColor = coaching?.primary_color || '#E25822';
     const logoUrl = coaching?.logo_url;
-    const coachingName = coaching?.name || 'Exam Edge';
+    const coachingName = coaching?.name || 'Vidya Yantra';
 
     // Protect Route
     useEffect(() => {
@@ -114,9 +115,7 @@ export const StudentLayout = () => {
                                 onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                             />
                         ) : (
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center flex-shrink-0">
-                                <span className="text-white font-bold text-xl">{coachingName.charAt(0)}</span>
-                            </div>
+                            <img src={ASSETS.appLogo} alt={coachingName} className="h-12 w-auto object-contain" />
                         )}
                         <div className="hidden md:block">
                             <h1 className="text-xl font-bold leading-none uppercase tracking-wide" style={{ color: primaryColor }}>{coachingName}</h1>
@@ -146,7 +145,7 @@ export const StudentLayout = () => {
                         {/* Avatar circle */}
                         <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 border border-slate-200 bg-slate-100">
                             <img
-                                src={user?.avatar_url || defaultAvatar}
+                                src={user?.avatar_url || ASSETS.studentAvatar}
                                 alt={user?.name || 'Student'}
                                 className="w-full h-full object-cover"
                             />
@@ -207,6 +206,14 @@ export const StudentLayout = () => {
                             </button>
                         </div>
                     </div>
+
+                    {/* Sidebar Footer */}
+                    <div className="px-6 pb-4">
+                        <p className="text-[10px] text-slate-400 leading-relaxed select-none">
+                            © 2025 Vidya Yantra<br />
+                            <span style={{ color: primaryColor }} className="font-medium">A product of Keshav Global Tech</span>
+                        </p>
+                    </div>
                 </aside>
 
                 {/* Main Content (Right) */}
@@ -222,6 +229,11 @@ export const StudentLayout = () => {
             <div className="lg:hidden">
                 <BottomNavigation />
             </div>
+
+            {/* Footer */}
+            <footer className="hidden lg:block text-center text-[11px] text-gray-400 py-3 border-t border-gray-100 select-none">
+                © 2025 Vidya Yantra &nbsp;·&nbsp; A product of <span className="text-indigo-500">Keshav Global Tech</span>
+            </footer>
 
             <ExamGoalSelectorModal
                 isOpen={isGoalSelectorOpen}

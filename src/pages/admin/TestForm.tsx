@@ -8,6 +8,7 @@ import { useBatches } from '@/hooks/data/useBatches';
 import { normalizeBatch } from '@/types/batch';
 import type { CreateQuestionInput } from '@/types/test';
 import Papa from 'papaparse';
+import { useExamGoals } from '@/hooks/data/useExamGoals';
 
 export const TestForm = () => {
     const navigate = useNavigate();
@@ -26,6 +27,7 @@ export const TestForm = () => {
 
     const { data: rawBatches = [] } = useBatches();
     const allBatches = rawBatches.map(normalizeBatch);
+    const { examGoals, isLoading: isLoadingGoals } = useExamGoals();
 
     const [formData, setFormData] = useState({
         title: '',
@@ -363,12 +365,12 @@ export const TestForm = () => {
                                             value={formData.exam_goal}
                                             onChange={(e) => handleChange('exam_goal', e.target.value)}
                                             className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white"
+                                            disabled={isLoadingGoals}
                                         >
                                             <option value="">Select Goal</option>
-                                            <option value="JEE">JEE</option>
-                                            <option value="NEET">NEET</option>
-                                            <option value="UPSC">UPSC</option>
-                                            <option value="Foundation">Foundation</option>
+                                            {examGoals.map(goal => (
+                                                <option key={goal.id} value={goal.name}>{goal.icon} {goal.name}</option>
+                                            ))}
                                         </select>
                                     </div>
                                     <div>

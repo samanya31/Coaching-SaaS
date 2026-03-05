@@ -164,6 +164,7 @@ export const StudentSettings = () => {
                 const { data, error } = await supabase
                     .from('exam_goals')
                     .select('id, name')
+                    .eq('coaching_id', coachingId)
                     .order('created_at', { ascending: true });
 
                 if (error) throw error;

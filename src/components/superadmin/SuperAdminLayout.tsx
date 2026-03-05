@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ASSETS } from '@/config/assets';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import {
     LayoutDashboard,
@@ -39,11 +40,9 @@ const Sidebar = ({ onClose }: { onClose?: () => void }) => {
             {/* Logo */}
             <div className="p-5 border-b border-white/10 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                        <span className="text-white font-black text-lg">S</span>
-                    </div>
+                    <img src={ASSETS.appLogo} alt="Vidya Yantra Logo" className="w-9 h-9 object-contain drop-shadow-lg" />
                     <div>
-                        <p className="font-bold text-white text-sm leading-tight">Exam Edge</p>
+                        <p className="font-bold text-white text-sm leading-tight">Vidya Yantra</p>
                         <div className="flex items-center gap-1">
                             <Shield className="w-2.5 h-2.5 text-indigo-400" />
                             <span className="text-indigo-400 text-[10px] font-semibold uppercase tracking-widest">Super Admin</span>

@@ -170,7 +170,7 @@ export const ImageBasedIDCard = ({ student, template }: ImageBasedIDCardProps) =
                             }}
                         >
                             <QRCodeSVG
-                                value={`https://examedge.com/verify/${student.id}`}
+                                value={`https://vidyayantra.com/verify/${student.id}`}
                                 size={template.back.qrCode.size}
                                 level="H"
                                 includeMargin={false}

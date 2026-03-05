@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -28,6 +28,8 @@ export const StudentLoginTest = () => {
 
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [examGoals, setExamGoals] = useState<any[]>([]);
+    const [isLoadingGoals, setIsLoadingGoals] = useState(false);
 
     const { coaching, isLoading: isTenantLoading } = useTenant();
     const navigate = useNavigate();
@@ -87,6 +89,32 @@ export const StudentLoginTest = () => {
             setLoading(false);
         }
     };
+
+    // Fetch goals for onboarding
+    useEffect(() => {
+        const fetchGoals = async () => {
+            if (!showOnboarding || !coaching?.id) return;
+            setIsLoadingGoals(true);
+            try {
+                const { data } = await supabase
+                    .from('exam_goals')
+                    .select('name')
+                    .eq('coaching_id', coaching.id)
+                    .order('name', { ascending: true });
+
+                if (data && data.length > 0) {
+                    setExamGoals(data);
+                    setCourse(data[0].name);
+                }
+            } catch (err) {
+                console.error('Error fetching goals:', err);
+            } finally {
+                setIsLoadingGoals(false);
+            }
+        };
+
+        fetchGoals();
+    }, [showOnboarding, coaching?.id]);
 
     // Complete onboarding
     const handleCompleteOnboarding = async (e: React.FormEvent) => {
@@ -169,13 +197,26 @@ export const StudentLoginTest = () => {
                                 value={course}
                                 onChange={(e) => setCourse(e.target.value)}
                                 className="w-full px-4 py-3 border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none transition-colors"
+                                disabled={isLoadingGoals}
                             >
-                                <option value="JEE">JEE (Engineering)</option>
-                                <option value="NEET">NEET (Medical)</option>
-                                <option value="UPSC">UPSC (Civil Services)</option>
-                                <option value="SSC">SSC</option>
-                                <option value="Banking">Banking</option>
-                                <option value="Other">Other</option>
+                                {isLoadingGoals ? (
+                                    <option>Loading goals...</option>
+                                ) : examGoals.length > 0 ? (
+                                    examGoals.map((g) => (
+                                        <option key={g.name} value={g.name}>
+                                            {g.name}
+                                        </option>
+                                    ))
+                                ) : (
+                                    <>
+                                        <option value="JEE">JEE (Engineering)</option>
+                                        <option value="NEET">NEET (Medical)</option>
+                                        <option value="UPSC">UPSC (Civil Services)</option>
+                                        <option value="SSC">SSC</option>
+                                        <option value="Banking">Banking</option>
+                                        <option value="Other">Other</option>
+                                    </>
+                                )}
                             </select>
                         </div>
 

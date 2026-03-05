@@ -4,11 +4,17 @@ import { BookOpen, Search, Filter } from 'lucide-react';
 import { useBatches } from '@/hooks/data/useBatches';
 import { BatchCard } from '@/components/student/BatchCard';
 import { normalizeBatch } from '@/types/batch';
+import { supabase } from '@/config/supabase';
+import { useTenant } from '@/app/providers/TenantProvider';
+import { ASSETS } from '@/config/assets';
 
 export const Batches = () => {
     const [selectedGoal, setSelectedGoal] = useState<string>('NEET');
     const [searchQuery, setSearchQuery] = useState('');
+    const [examGoals, setExamGoals] = useState<string[]>([]);
+    const [isLoadingGoals, setIsLoadingGoals] = useState(true);
 
+    const { coachingId } = useTenant();
     const { data: rawBatches = [] } = useBatches();
     // Normalize batches to ensure compatibility with UI components expecting camelCase
     const allBatches = useMemo(() => rawBatches.map(normalizeBatch), [rawBatches]);
@@ -20,6 +26,36 @@ export const Batches = () => {
             setSelectedGoal(savedGoal);
         }
     }, []);
+
+    // Fetch active exam goals for this institute
+    useEffect(() => {
+        const fetchGoals = async () => {
+            if (!coachingId) return;
+            try {
+                const { data } = await supabase
+                    .from('exam_goals')
+                    .select('name')
+                    .eq('coaching_id', coachingId)
+                    .order('name', { ascending: true });
+
+                if (data && data.length > 0) {
+                    const goalNames = data.map(g => g.name);
+                    setExamGoals(goalNames);
+                    // If current selected goal is not in the list, pick the first one
+                    const savedGoal = localStorage.getItem('selectedExamGoal');
+                    if (!savedGoal || !goalNames.includes(savedGoal)) {
+                        setSelectedGoal(goalNames[0]);
+                    }
+                }
+            } catch (err) {
+                console.error('Error fetching goals:', err);
+            } finally {
+                setIsLoadingGoals(false);
+            }
+        };
+
+        fetchGoals();
+    }, [coachingId]);
 
     // Filter batches when goal or search changes
     // We derive this during render to avoid useEffect synchronization loops
@@ -39,22 +75,14 @@ export const Batches = () => {
         return result;
     }, [allBatches, selectedGoal, searchQuery]);
 
-    const examGoals = [
-        'NEET',
-        'JEE',
-        'UPSC',
-        'SSC',
-        'Banking',
-        'Foundation',
-        'School Boards'
-    ];
+
 
     return (
         <div className="min-h-screen bg-gray-50 pb-20 md:pb-8">
             {/* Header */}
             <div className="relative text-white py-8 px-4 overflow-hidden rounded-2xl mx-2 mt-2">
                 <img
-                    src="/src/assets/batch.png"
+                    src={ASSETS.batchBg}
                     alt="Batches"
                     className="absolute inset-0 w-full h-full object-cover"
                 />

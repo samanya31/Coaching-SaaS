@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Lock, Mail, Eye, EyeOff, Shield, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/config/supabase';
+import { ASSETS } from '@/config/assets';
 
 export const AdminLogin = () => {
     const navigate = useNavigate();
@@ -157,7 +158,7 @@ export const AdminLogin = () => {
     };
 
     return (
-        <div className="relative min-h-screen overflow-hidden font-sans text-gray-100">
+        <div className="relative min-h-screen font-sans text-gray-100 flex flex-col">
             {/* ===== PAGE BACKGROUND SPLIT ===== */}
             <div className="absolute inset-0 flex flex-col lg:flex-row">
                 {/* LEFT DARK HALF */}
@@ -197,7 +198,7 @@ export const AdminLogin = () => {
                             <div className="absolute top-0 right-0 w-48 h-48 bg-[#6188FC]/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
 
                             <img
-                                src="/src/assets/admin_portal_res.png"
+                                src={ASSETS.adminPortalRes}
                                 alt="Admin Portal"
                                 className="w-full h-full object-cover object-center relative z-10"
                             />
@@ -282,6 +283,14 @@ export const AdminLogin = () => {
                                 </Button>
                             </form>
                         </div>
+
+                        {/* Footer - pinned to bottom of left panel */}
+                        <div className="mt-auto pt-8">
+                            <p className="text-[11px] text-[#8B8D97] select-none">
+                                © 2025 Vidya Yantra<br />
+                                <span className="text-[#6188FC] font-medium">A product of Keshav Global Tech</span>
+                            </p>
+                        </div>
                     </div>
 
                     {/* RIGHT IMAGE (Hidden Mobile & Tablet / 50% Desktop) */}
@@ -292,7 +301,7 @@ export const AdminLogin = () => {
 
                         {/* Actual Image */}
                         <img
-                            src="/src/assets/admin_portal.png"
+                            src={ASSETS.adminPortal}
                             alt="Admin Portal Dashboard"
                             className="
     absolute

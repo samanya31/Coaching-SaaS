@@ -4,6 +4,7 @@ import { ArrowLeft, Save, BookOpen, User, DollarSign, Calendar, Image } from 'lu
 import { Button } from '@/components/ui/button';
 import { useBatch, useCreateBatch, useUpdateBatch } from '@/hooks/data/useBatches';
 import { useInstructors } from '@/hooks/data/useInstructors';
+import { useExamGoals } from '@/hooks/data/useExamGoals';
 import {
     Select,
     SelectContent,
@@ -20,6 +21,7 @@ export const BatchForm = () => {
     // Hooks
     const { data: existingBatch, isLoading } = useBatch(id || '');
     const { data: instructors = [] } = useInstructors();
+    const { examGoals, isLoading: isLoadingGoals } = useExamGoals();
     const createBatch = useCreateBatch();
     const updateBatch = useUpdateBatch();
 
@@ -195,21 +197,24 @@ export const BatchForm = () => {
                         </div>
                     </div>
 
-                    {/* Exam Goal - Added Field */}
+                    {/* Exam Goal - Dynamic Dropdown */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Exam Goal <span className="text-red-500">*</span>
                         </label>
                         <div className="relative">
                             <BookOpen className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                            <input
-                                type="text"
+                            <select
                                 value={formData.examGoal}
                                 onChange={(e) => handleChange('examGoal', e.target.value)}
-                                className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${errors.examGoal ? 'border-red-500' : 'border-gray-200'
-                                    }`}
-                                placeholder="e.g., JEE Advanced, NEET, UPSC"
-                            />
+                                className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white ${errors.examGoal ? 'border-red-500' : 'border-gray-200'}`}
+                                disabled={isLoadingGoals}
+                            >
+                                <option value="">Select Exam Goal</option>
+                                {examGoals.map(goal => (
+                                    <option key={goal.id} value={goal.name}>{goal.icon} {goal.name}</option>
+                                ))}
+                            </select>
                         </div>
                         {errors.examGoal && <p className="text-red-500 text-sm mt-1">{errors.examGoal}</p>}
                     </div>

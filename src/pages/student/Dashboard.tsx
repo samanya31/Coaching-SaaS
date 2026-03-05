@@ -27,8 +27,7 @@ import { normalizeBatch } from '@/types/batch';
 import { format } from 'date-fns';
 
 // Assets
-import dashboardBg from '@/assets/dashboard-bg.png';
-import studentAvatar from '@/assets/student-avatar.png';
+import { ASSETS } from '@/config/assets';
 
 export const StudentDashboard = () => {
     const navigate = useNavigate();
@@ -182,7 +181,7 @@ export const StudentDashboard = () => {
                 <div
                     className="absolute inset-0 z-0"
                     style={{
-                        backgroundImage: `url(${dashboardBg})`,
+                        backgroundImage: `url(${ASSETS.dashboardBg})`,
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
                     }}
@@ -225,7 +224,7 @@ export const StudentDashboard = () => {
                     {/* 3D Illustration */}
                     <div className="hidden md:block w-64 h-64 md:w-72 md:h-72 flex-shrink-0 -mr-4 -mb-12 scale-[1.4]">
                         <img
-                            src={studentAvatar}
+                            src={ASSETS.studentAvatar}
                             alt="Student"
                             className="w-full h-full object-contain drop-shadow-2xl animate-float "
                         />

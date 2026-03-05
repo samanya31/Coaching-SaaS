@@ -125,7 +125,7 @@ export const IDCardGenerator = () => {
                             <div className="relative h-full p-6 flex flex-col">
                                 {/* Header */}
                                 <div className="text-center mb-4">
-                                    <h2 className="text-white font-bold text-lg">ExamEdge Academy</h2>
+                                    <h2 className="text-white font-bold text-lg">Vidya Yantra Academy</h2>
                                     <p className={`text-${selectedTemplate.secondaryColor}-100 text-xs`}>Student Identification Card</p>
                                 </div>
 
@@ -167,7 +167,7 @@ export const IDCardGenerator = () => {
 
                                 {/* Footer */}
                                 <div className={`text-center border-t border-${selectedTemplate.secondaryColor}-400 pt-2`}>
-                                    <p className={`text-${selectedTemplate.secondaryColor}-100 text-[10px]`}>www.examedge.com | support@examedge.com</p>
+                                    <p className={`text-${selectedTemplate.secondaryColor}-100 text-[10px]`}>www.vidyayantra.com | support@vidyayantra.com</p>
                                 </div>
                             </div>
                         </div>
@@ -209,7 +209,7 @@ export const IDCardGenerator = () => {
                                     <div className="flex flex-col items-center justify-center">
                                         <div className="w-24 h-24 bg-white rounded-lg flex items-center justify-center border-2 border-gray-200 p-2">
                                             <QRCodeSVG
-                                                value={`https://examedge.com/verify/${student.id}`}
+                                                value={`https://vidyayantra.com/verify/${student.id}`}
                                                 size={80}
                                                 level="H"
                                                 includeMargin={false}

@@ -53,6 +53,7 @@ export const usePlanFeatures = (coachingId: string | null | undefined) => {
         canUseTests: noPlan || plan.tests_enabled,
         canUsePayments: noPlan || plan.payments_enabled,
         canUseCustomDomain: noPlan || plan.custom_domain,
+        canUseBranding: true, // TODO: Tie this to a specific db column on saas_plans if needed (e.g. `plan.branding_enabled`), for now it's a feature flag that's always on.
         // Limits
         maxStudents: plan?.max_students ?? Infinity,
         maxStorageGb: plan?.max_storage_gb ?? Infinity,

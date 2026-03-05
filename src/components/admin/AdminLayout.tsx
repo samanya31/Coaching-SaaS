@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ASSETS } from '@/config/assets';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import {
     LayoutDashboard,
@@ -21,9 +22,11 @@ import {
     Ticket,
     Lock,
     Crown,
+    Palette,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePlanFeatures } from '@/hooks/data/usePlan';
+import { useTenant } from '@/app/providers/TenantProvider';
 
 // planFeature: key from usePlanFeatures — undefined = always allowed
 const allSidebarItems = [
@@ -37,6 +40,7 @@ const allSidebarItems = [
     { path: '/admin/dashboard/reports', icon: BarChart3, label: 'Reports', requiredRoles: ['coaching_admin', 'super_admin'], planFeature: undefined },
     { path: '/admin/dashboard/instructors', icon: UserCog, label: 'Instructors', requiredRoles: ['staff', 'coaching_admin', 'super_admin'], planFeature: undefined },
     { path: '/admin/dashboard/support-tickets', icon: Ticket, label: 'Support Tickets', requiredRoles: ['coaching_admin', 'super_admin'], planFeature: undefined },
+    { path: '/admin/dashboard/branding', icon: Palette, label: 'Branding', requiredRoles: ['coaching_admin', 'super_admin'], planFeature: 'canUseBranding' as const },
     { path: '/admin/dashboard/settings', icon: Settings, label: 'Settings', requiredRoles: ['coaching_admin', 'super_admin'], planFeature: undefined },
 ];
 
@@ -52,6 +56,13 @@ export const AdminLayout = () => {
 
     // Plan feature flags — real enforcement
     const planFeatures = usePlanFeatures(coachingId);
+
+    // Coaching branding
+    const { coaching } = useTenant();
+    const coachingName = coaching?.name || 'Admin Portal';
+    const coachingLogo = coaching?.logo_url || ASSETS.appLogo;
+    const primaryColor = coaching?.primary_color || '#4f46e5';
+    const secondaryColor = coaching?.secondary_color || '#7c3aed';
 
     // Filter sidebar items based on user role
     const sidebarItems = allSidebarItems.filter(item =>
@@ -78,16 +89,17 @@ export const AdminLayout = () => {
             {/* Desktop Sidebar */}
             <aside className="hidden lg:flex lg:flex-col w-64 bg-white border-r border-gray-200 shadow-lg fixed left-0 top-0 bottom-0 z-30">
                 {/* Logo */}
-                <div className="p-6 border-b border-gray-200">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
-                            <span className="text-white font-bold text-xl">E</span>
-                        </div>
-                        <div>
-                            <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                                Admin Portal
-                            </h1>
-                            <p className="text-xs text-gray-500">Exam Edge</p>
+                <div className="px-5 py-4 border-b border-gray-200">
+                    <div className="flex items-center gap-3 min-w-0">
+                        <img src={coachingLogo} alt={coachingName} className="w-9 h-9 flex-shrink-0 object-contain rounded-lg" />
+                        <div className="min-w-0">
+                            <p
+                                className="text-base font-bold leading-tight truncate"
+                                style={{ color: primaryColor }}
+                            >
+                                {coachingName}
+                            </p>
+                            <p className="text-xs text-gray-400 mt-0.5">Admin Portal</p>
                         </div>
                     </div>
                 </div>
@@ -150,6 +162,14 @@ export const AdminLayout = () => {
                         <span className="font-medium">Logout</span>
                     </button>
                 </div>
+
+                {/* Sidebar Footer */}
+                <div className="px-4 pb-4">
+                    <p className="text-[10px] text-gray-400 leading-relaxed select-none">
+                        © 2025 Vidya Yantra<br />
+                        <span className="text-indigo-400">A product of Keshav Global Tech</span>
+                    </p>
+                </div>
             </aside>
 
 
@@ -159,15 +179,17 @@ export const AdminLayout = () => {
                     <div className="absolute inset-0 bg-black/50" onClick={() => setIsSidebarOpen(false)} />
                     <aside className="absolute left-0 top-0 bottom-0 w-64 bg-white shadow-xl">
                         {/* Logo */}
-                        <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
-                                    <span className="text-white font-bold text-xl">E</span>
-                                </div>
-                                <div>
-                                    <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                                        Admin
-                                    </h1>
+                        <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
+                            <div className="flex items-center gap-3 min-w-0 flex-1">
+                                <img src={coachingLogo} alt={coachingName} className="w-9 h-9 flex-shrink-0 object-contain rounded-lg" />
+                                <div className="min-w-0">
+                                    <p
+                                        className="text-base font-bold leading-tight truncate"
+                                        style={{ color: primaryColor }}
+                                    >
+                                        {coachingName}
+                                    </p>
+                                    <p className="text-xs text-gray-400 mt-0.5">Admin Portal</p>
                                 </div>
                             </div>
                             <button onClick={() => setIsSidebarOpen(false)}>

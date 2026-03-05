@@ -91,8 +91,8 @@ const ActionMenu = ({ inst }: { inst: Institute }) => {
                                             key={p.id}
                                             onClick={() => assignPlan(p.id)}
                                             className={`text-[11px] px-2 py-0.5 rounded-full capitalize font-medium border transition-all ${inst.plan_id === p.id
-                                                    ? 'bg-indigo-600 text-white border-indigo-600'
-                                                    : 'border-gray-200 hover:border-indigo-400 hover:text-indigo-600'
+                                                ? 'bg-indigo-600 text-white border-indigo-600'
+                                                : 'border-gray-200 hover:border-indigo-400 hover:text-indigo-600'
                                                 }`}
                                         >
                                             {p.name}
@@ -185,7 +185,7 @@ const InstituteCard = ({ inst, index }: { inst: Institute; index: number }) => {
                         <h3 className="font-semibold text-gray-900 text-sm leading-tight">{inst.name}</h3>
                         <p className="text-[11px] text-gray-400 flex items-center gap-1 mt-0.5">
                             <Globe className="w-3 h-3" />
-                            {inst.subdomain ? `${inst.subdomain}.examedge.in` : inst.slug}
+                            {inst.subdomain ? `${inst.subdomain}.vidyayantra.in` : inst.slug}
                         </p>
                     </div>
                 </div>

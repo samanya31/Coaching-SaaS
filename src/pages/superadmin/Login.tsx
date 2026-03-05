@@ -57,7 +57,7 @@ export const SuperAdminLogin = () => {
                             <span className="text-white text-2xl font-black">S</span>
                         </div>
                         <h1 className="text-2xl font-bold text-white">Welcome back</h1>
-                        <p className="text-slate-400 text-sm mt-1">Exam Edge · Platform Control</p>
+                        <p className="text-slate-400 text-sm mt-1">Vidya Yantra · Platform Control</p>
                     </div>
 
                     {error && (
@@ -75,7 +75,7 @@ export const SuperAdminLogin = () => {
                                 value={email}
                                 onChange={e => setEmail(e.target.value)}
                                 required
-                                placeholder="admin@examedge.in"
+                                placeholder="admin@vidyayantra.in"
                                 className="w-full bg-white/5 border border-white/10 text-white placeholder-slate-500 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition"
                             />
                         </div>

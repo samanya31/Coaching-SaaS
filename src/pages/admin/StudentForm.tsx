@@ -9,8 +9,8 @@ import { toast } from 'sonner';
 import { useTenant } from '@/app/providers/TenantProvider';
 import r2 from '@/services/r2.service';
 import { createStudentAccount } from '@/services/admin/studentManagement.service';
+import { useExamGoals } from '@/hooks/data/useExamGoals';
 
-const examGoals = ['JEE', 'NEET', 'UPSC', 'Government', 'Banking', 'Engineering', 'College'];
 const languages = ['Hinglish', 'English', 'Hindi'];
 
 export const StudentForm = () => {
@@ -18,6 +18,7 @@ export const StudentForm = () => {
     const navigate = useNavigate();
     const isEdit = !!id;
     const { coachingId } = useTenant();
+    const { examGoals, isLoading: isLoadingGoals } = useExamGoals();
 
     // Fetch existing student data if in edit mode
     const { data: existingStudent, isLoading } = useUser(id);
@@ -124,12 +125,12 @@ export const StudentForm = () => {
             return;
         }
 
-        // Logic: firstname.last4phone@examedge.com
+        // Logic: firstname.last4phone@vidyayantra.com
         // Clean name: remove spaces, special chars, lowercase
         const cleanName = formData.name.split(' ')[0].toLowerCase().replace(/[^a-z0-9]/g, '');
         const phoneSuffix = formData.phone.slice(-4) || '1234';
 
-        const autoEmail = `${cleanName}.${phoneSuffix}@examedge.com`;
+        const autoEmail = `${cleanName}.${phoneSuffix}@vidyayantra.com`;
         const autoPass = `Welcome@${phoneSuffix}`;
 
         setFormData(prev => ({
@@ -406,9 +407,11 @@ export const StudentForm = () => {
                             value={formData.examGoal}
                             onChange={(e) => handleChange('examGoal', e.target.value)}
                             className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none bg-white"
+                            disabled={isLoadingGoals}
                         >
+                            <option value="">Select Goal</option>
                             {examGoals.map(goal => (
-                                <option key={goal} value={goal}>{goal}</option>
+                                <option key={goal.id} value={goal.name}>{goal.icon} {goal.name}</option>
                             ))}
                         </select>
                     </div>

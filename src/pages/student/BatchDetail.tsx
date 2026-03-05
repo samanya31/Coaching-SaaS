@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, CalendarDays, Clock, Users, Star, IndianRupee, FileText, Video, File as FileIcon, Download, Eye, LayoutGrid, VideoIcon, Radio, Hourglass } from 'lucide-react';
@@ -15,6 +15,10 @@ import { enrollmentService } from '@/services/api/enrollment.service';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTenant } from '@/app/providers/TenantProvider';
 
+// Lazy-load heavy player components — Zoom SDK is ~3MB and must NOT be in the main bundle
+const ZoomPlayer = lazy(() => import('@/components/student/ZoomPlayer').then(m => ({ default: m.ZoomPlayer })));
+const YouTubePlayer = lazy(() => import('@/components/student/YouTubePlayer').then(m => ({ default: m.YouTubePlayer })));
+
 interface ClassCardData {
     id: string;
     title: string;
@@ -28,6 +32,11 @@ interface ClassCardData {
     thumbnail: string;
     videoUrl?: string;
     liveUrl?: string;
+    // Platform-specific
+    platform?: 'zoom' | 'youtube' | 'custom';
+    zoomMeetingNumber?: string;
+    zoomMeetingPassword?: string;
+    youtubeVideoId?: string;
 }
 
 export const BatchDetail = () => {
@@ -108,9 +117,13 @@ export const BatchDetail = () => {
                 startTime: new Date(c.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                 duration: c.duration_minutes + ' min',
                 type,
-                thumbnail: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=800',
+                thumbnail: c.thumbnail_url || 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=800',
                 videoUrl: c.recording_url,
-                liveUrl: c.meeting_link
+                liveUrl: c.meeting_link,
+                platform: c.platform,
+                zoomMeetingNumber: c.zoom_meeting_number,
+                zoomMeetingPassword: c.zoom_meeting_password,
+                youtubeVideoId: c.youtube_video_id,
             };
         });
 
@@ -131,7 +144,7 @@ export const BatchDetail = () => {
                 startTime: new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                 duration: course.duration_hours ? `${course.duration_hours}h` : (firstContent?.duration_seconds ? `${Math.floor(firstContent.duration_seconds / 60)} min` : 'N/A'),
                 type: 'recorded' as const,
-                thumbnail: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=800',
+                thumbnail: course.thumbnail_url || 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=800',
                 videoUrl: mediaUrl,
                 liveUrl: undefined
             };
@@ -144,6 +157,10 @@ export const BatchDetail = () => {
     const [view, setView] = useState<'classes' | 'materials'>('classes');
     const [filter, setFilter] = useState<'all' | 'recorded' | 'live' | 'upcoming'>('all');
     const [showPaymentModal, setShowPaymentModal] = useState(false);
+
+    // Active player state
+    const [activeZoom, setActiveZoom] = useState<{ meetingNumber: string; password: string; title: string } | null>(null);
+    const [activeYouTube, setActiveYouTube] = useState<{ videoId: string; title: string; isLive: boolean } | null>(null);
 
     // Fetch study materials for this batch
     const { data: studyMaterials = [], isLoading: isMaterialsLoading } = useStudyMaterials(batchId);
@@ -178,8 +195,34 @@ export const BatchDetail = () => {
     }
 
     const handleClassClick = (classData: ClassCardData) => {
-        if (classData.type === 'recorded' || classData.type === 'live') {
-            // Navigate to video player
+        if (classData.type === 'live') {
+            // Zoom — open embedded player
+            if (classData.platform === 'zoom' && classData.zoomMeetingNumber) {
+                setActiveZoom({
+                    meetingNumber: classData.zoomMeetingNumber,
+                    password: classData.zoomMeetingPassword || '',
+                    title: classData.title,
+                });
+                return;
+            }
+            // YouTube live
+            if (classData.platform === 'youtube' && classData.youtubeVideoId) {
+                setActiveYouTube({ videoId: classData.youtubeVideoId, title: classData.title, isLive: true });
+                return;
+            }
+            // Custom link — open in new tab
+            if (classData.liveUrl) {
+                window.open(classData.liveUrl, '_blank', 'noopener');
+                return;
+            }
+        }
+        if (classData.type === 'recorded') {
+            // YouTube recorded
+            if (classData.youtubeVideoId) {
+                setActiveYouTube({ videoId: classData.youtubeVideoId, title: classData.title, isLive: false });
+                return;
+            }
+            // Video file player
             navigate(`/student/player/${classData.id}`, {
                 state: {
                     videoUrl: classData.videoUrl || classData.liveUrl,
@@ -314,8 +357,8 @@ export const BatchDetail = () => {
                                             key={key}
                                             onClick={() => setFilter(key)}
                                             className={`relative inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all duration-200 select-none ${isActive
-                                                    ? `bg-gradient-to-r ${activeGrad} text-white border-transparent shadow-lg ${activeShadow} -translate-y-0.5`
-                                                    : `bg-white text-gray-500 border-gray-200 ${hoverBorder} hover:-translate-y-px hover:shadow-sm`
+                                                ? `bg-gradient-to-r ${activeGrad} text-white border-transparent shadow-lg ${activeShadow} -translate-y-0.5`
+                                                : `bg-white text-gray-500 border-gray-200 ${hoverBorder} hover:-translate-y-px hover:shadow-sm`
                                                 }`}
                                         >
                                             <Icon className="w-4 h-4 flex-shrink-0" />
@@ -450,6 +493,31 @@ export const BatchDetail = () => {
                 courseTitle={batch.title}
                 onConfirm={handlePaymentConfirm}
             />
+
+            {/* Zoom Player Overlay */}
+            {activeZoom && (
+                <Suspense fallback={<div className="fixed inset-0 bg-black flex items-center justify-center text-white text-lg">Loading Zoom...</div>}>
+                    <ZoomPlayer
+                        meetingNumber={activeZoom.meetingNumber}
+                        password={activeZoom.password}
+                        userName={(user as any)?.user_metadata?.full_name || user?.name || 'Student'}
+                        userEmail={user?.email}
+                        onClose={() => setActiveZoom(null)}
+                    />
+                </Suspense>
+            )}
+
+            {/* YouTube Player Overlay */}
+            {activeYouTube && (
+                <Suspense fallback={null}>
+                    <YouTubePlayer
+                        videoId={activeYouTube.videoId}
+                        title={activeYouTube.title}
+                        isLive={activeYouTube.isLive}
+                        onClose={() => setActiveYouTube(null)}
+                    />
+                </Suspense>
+            )}
         </div>
     );
 };

@@ -49,7 +49,7 @@ export default defineConfig(({ mode }) => ({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024, // 3 MiB (bundle is ~2.45MB)
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MiB (Zoom SDK chunk is ~3MB)
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/images\.unsplash\.com\/.*/i,

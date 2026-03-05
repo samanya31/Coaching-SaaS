@@ -6,7 +6,7 @@ import { useBatches } from '@/hooks/data/useBatches';
 import { normalizeBatch } from '@/types/batch';
 import { YouTubeLivePlayer } from '@/components/video/YouTubeLivePlayer';
 import { format } from 'date-fns';
-import liveHero from '@/assets/live.png';
+import { ASSETS } from '@/config/assets';
 
 export const StudentLiveClasses = () => {
     const navigate = useNavigate();
@@ -78,7 +78,7 @@ export const StudentLiveClasses = () => {
             {/* Header */}
             <div className="relative text-white py-8 px-4 overflow-hidden rounded-2xl mx-2 mt-2">
                 <img
-                    src={liveHero}
+                    src={ASSETS.liveBg}
                     alt="Live Classes"
                     className="absolute inset-0 w-full h-full object-cover rounded-2xl"
                 />

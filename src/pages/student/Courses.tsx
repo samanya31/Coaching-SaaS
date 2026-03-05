@@ -3,7 +3,7 @@ import { BookOpen, Search } from 'lucide-react';
 import { useBatches } from '@/hooks/data/useBatches';
 import { BatchCard } from '@/components/student/BatchCard';
 import { normalizeBatch } from '@/types/batch';
-import coursesHero from '@/assets/courses.png';
+import { ASSETS } from '@/config/assets';
 
 export const StudentCourses = () => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -25,7 +25,7 @@ export const StudentCourses = () => {
             {/* Header */}
             <div className="relative text-white py-8 px-4 overflow-hidden rounded-2xl mx-2 mt-2">
                 <img
-                    src={coursesHero}
+                    src={ASSETS.coursesBg}
                     alt="My Courses"
                     className="absolute inset-0 w-full h-full object-cover"
                 />

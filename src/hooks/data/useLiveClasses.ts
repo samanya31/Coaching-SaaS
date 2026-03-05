@@ -15,13 +15,20 @@ export interface LiveClass {
     scheduled_at: string;
     duration_minutes: number;
     status: 'scheduled' | 'live' | 'completed' | 'cancelled';
-    platform?: string;
+    platform?: 'zoom' | 'youtube' | 'custom';
     meeting_link?: string;
     recording_url?: string;
+    // Zoom embedded
+    zoom_meeting_number?: string;
+    zoom_meeting_password?: string;
+    // YouTube embed
+    youtube_video_id?: string;
+    thumbnail_url?: string;
     max_participants?: number;
     created_at?: string;
     updated_at?: string;
 }
+
 
 /**
  * Query Keys for Live Classes

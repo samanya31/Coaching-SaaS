@@ -6,8 +6,7 @@ import { useTenant } from '@/app/providers/TenantProvider';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/config/supabase';
 import { updateStudentProfile } from '@/services/auth/studentAuth.service';
-import studentPortal from '@/assets/student_portal.png';
-import studentPortalRes from '@/assets/student_portal_res.png';
+import { ASSETS } from '@/config/assets';
 
 /**
  * Student Login with Email + Password
@@ -26,6 +25,8 @@ export const StudentLogin = () => {
 
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [examGoals, setExamGoals] = useState<any[]>([]);
+    const [isLoadingGoals, setIsLoadingGoals] = useState(false);
 
     const { coaching, isLoading: isTenantLoading } = useTenant();
     const { login } = useAuth();
@@ -97,6 +98,32 @@ export const StudentLogin = () => {
             setLoading(false);
         }
     };
+
+    // Fetch goals for onboarding
+    useEffect(() => {
+        const fetchGoals = async () => {
+            if (!showOnboarding || !coaching?.id) return;
+            setIsLoadingGoals(true);
+            try {
+                const { data } = await supabase
+                    .from('exam_goals')
+                    .select('name')
+                    .eq('coaching_id', coaching.id)
+                    .order('name', { ascending: true });
+
+                if (data && data.length > 0) {
+                    setExamGoals(data);
+                    setCourse(data[0].name);
+                }
+            } catch (err) {
+                console.error('Error fetching goals:', err);
+            } finally {
+                setIsLoadingGoals(false);
+            }
+        };
+
+        fetchGoals();
+    }, [showOnboarding, coaching?.id]);
 
     // Complete onboarding
     const handleCompleteOnboarding = async (e: React.FormEvent) => {
@@ -179,13 +206,26 @@ export const StudentLogin = () => {
                                 value={course}
                                 onChange={(e) => setCourse(e.target.value)}
                                 className="w-full px-4 py-3 border-2 border-stone-200 rounded-xl focus:border-amber-500 focus:outline-none transition-colors"
+                                disabled={isLoadingGoals}
                             >
-                                <option value="JEE">JEE (Engineering)</option>
-                                <option value="NEET">NEET (Medical)</option>
-                                <option value="UPSC">UPSC (Civil Services)</option>
-                                <option value="SSC">SSC</option>
-                                <option value="Banking">Banking</option>
-                                <option value="Other">Other</option>
+                                {isLoadingGoals ? (
+                                    <option>Loading goals...</option>
+                                ) : examGoals.length > 0 ? (
+                                    examGoals.map((g) => (
+                                        <option key={g.name} value={g.name}>
+                                            {g.name}
+                                        </option>
+                                    ))
+                                ) : (
+                                    <>
+                                        <option value="JEE">JEE (Engineering)</option>
+                                        <option value="NEET">NEET (Medical)</option>
+                                        <option value="UPSC">UPSC (Civil Services)</option>
+                                        <option value="SSC">SSC</option>
+                                        <option value="Banking">Banking</option>
+                                        <option value="Other">Other</option>
+                                    </>
+                                )}
                             </select>
                         </div>
 
@@ -256,7 +296,7 @@ export const StudentLogin = () => {
                             <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_25%_30%,#c7d2fe,transparent_45%),radial-gradient(circle_at_80%_70%,#bfdbfe,transparent_45%)]" />
 
                             <img
-                                src={studentPortalRes}
+                                src={ASSETS.studentPortalRes}
                                 alt="Student Portal"
                                 className="w-full h-full object-contain object-bottom relative z-10"
                             />
@@ -313,6 +353,14 @@ export const StudentLogin = () => {
                                 </button>
                             </form>
                         </div>
+
+                        {/* Footer - pinned to bottom of left panel */}
+                        <div className="mt-auto pt-8">
+                            <p className="text-[11px] text-gray-400 select-none">
+                                © 2025 Vidya Yantra<br />
+                                <span className="text-[#3B82F6] font-medium">A product of Keshav Global Tech</span>
+                            </p>
+                        </div>
                     </div>
 
                     {/* RIGHT IMAGE (Hidden Mobile & Tablet / 50% Desktop) */}
@@ -325,7 +373,7 @@ export const StudentLogin = () => {
                         />
 
                         <img
-                            src={studentPortal}
+                            src={ASSETS.studentPortal}
                             alt="Student Portal"
                             className="
 absolute

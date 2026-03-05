@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button';
 import { useAnnouncement, useCreateAnnouncement, useUpdateAnnouncement } from '@/hooks/data/useAnnouncements';
 import { useBatches } from '@/hooks/data/useBatches';
 import { Announcement } from '@/services/api/announcement.service';
+import { useExamGoals } from '@/hooks/data/useExamGoals';
 
-const examGoals = ['NEET', 'JEE', 'UPSC', 'SSC', 'Banking', 'Foundation', 'School Boards'];
 type AnnouncementType = Announcement['type'];
 const announcementTypes: { value: AnnouncementType; label: string; icon: any; color: string }[] = [
     { value: 'info', label: 'Information', icon: Info, color: 'text-blue-500' },
@@ -24,6 +24,7 @@ export const AnnouncementForm = () => {
     // Hooks
     const { data: existingAnnouncement, isLoading } = useAnnouncement(id || '');
     const { data: batches = [] } = useBatches();
+    const { examGoals, isLoading: isLoadingGoals } = useExamGoals();
     const createAnnouncement = useCreateAnnouncement();
     const updateAnnouncement = useUpdateAnnouncement();
 
@@ -178,10 +179,11 @@ export const AnnouncementForm = () => {
                                         onChange={(e) => handleChange('targetValue', e.target.value)}
                                         className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
                                         required
+                                        disabled={isLoadingGoals}
                                     >
                                         <option value="">Select Exam Goal</option>
                                         {examGoals.map(goal => (
-                                            <option key={goal} value={goal}>{goal}</option>
+                                            <option key={goal.id} value={goal.name}>{goal.icon} {goal.name}</option>
                                         ))}
                                     </select>
                                 </div>

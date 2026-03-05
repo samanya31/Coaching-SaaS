@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/config/supabase';
+import { useTenant } from '@/app/providers/TenantProvider';
 
 interface ExamGoal {
     id: string;
@@ -33,15 +34,22 @@ export const ExamGoalProvider = ({ children }: { children: ReactNode }) => {
     const [isGoalSelectorOpen, setIsGoalSelectorOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
+    const { coachingId } = useTenant();
+
     const openGoalSelector = () => setIsGoalSelectorOpen(true);
     const closeGoalSelector = () => setIsGoalSelectorOpen(false);
 
     useEffect(() => {
         const fetchGoals = async () => {
+            if (!coachingId) {
+                setIsLoading(false);
+                return;
+            }
             try {
                 const { data, error } = await supabase
                     .from('exam_goals')
                     .select('*')
+                    .eq('coaching_id', coachingId)
                     .order('created_at', { ascending: true });
 
                 if (error) throw error;
@@ -63,7 +71,7 @@ export const ExamGoalProvider = ({ children }: { children: ReactNode }) => {
         };
 
         fetchGoals();
-    }, []);
+    }, [coachingId]);
 
     return (
         <ExamGoalContext.Provider value={{

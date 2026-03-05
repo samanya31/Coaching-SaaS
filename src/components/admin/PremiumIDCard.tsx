@@ -50,7 +50,7 @@ export const PremiumIDCard = ({ student }: PremiumIDCardProps) => {
                         className="text-white font-bold tracking-wider text-center"
                         style={{ letterSpacing: '0.05em' }}
                     >
-                        EXAMEDGE ACADEMY
+                        VIDYA YANTRA ACADEMY
                     </h2>
                 </div>
 
@@ -318,7 +318,7 @@ export const PremiumIDCard = ({ student }: PremiumIDCardProps) => {
                             }}
                         >
                             <QRCodeSVG
-                                value={`https://examedge.com/verify/${student.id}`}
+                                value={`https://vidyayantra.com/verify/${student.id}`}
                                 size={80}
                                 level="H"
                                 includeMargin={false}
@@ -350,7 +350,7 @@ export const PremiumIDCard = ({ student }: PremiumIDCardProps) => {
                             opacity: 0.9
                         }}
                     >
-                        This card is property of ExamEdge Academy. If found, please return.
+                        This card is property of Vidya Yantra Academy. If found, please return.
                     </p>
                 </div>
             </div>

@@ -38,6 +38,7 @@ import { SuperAdminInstitutes } from "./pages/superadmin/Institutes";
 import { SuperAdminPlans } from "./pages/superadmin/Plans";
 import { SuperAdminFinance } from "./pages/superadmin/Finance";
 import { SuperAdminStorage } from "./pages/superadmin/Storage";
+import { Settings as SuperAdminSettings } from "./pages/superadmin/Settings";
 
 // Admin Portal
 import { AdminLayout } from "./components/admin/AdminLayout";
@@ -58,7 +59,9 @@ import { ContentForm } from "./pages/admin/ContentForm";
 import { LiveClasses } from "./pages/admin/LiveClasses";
 import { LiveClassForm } from "./pages/admin/LiveClassForm";
 import { Finance } from "./pages/admin/Finance";
+import { Branding } from "./pages/admin/Branding";
 import { Settings } from "./pages/admin/Settings";
+import { IntegrationsSettings } from "./pages/admin/settings/IntegrationsSettings";
 import { Tests } from "./pages/admin/Tests";
 import { TestForm } from "./pages/admin/TestForm";
 import { Announcements } from "./pages/admin/Announcements";
@@ -145,6 +148,7 @@ const App = () => (
                   <Route path="plans" element={<SuperAdminPlans />} />
                   <Route path="billing" element={<SuperAdminFinance />} />
                   <Route path="storage" element={<SuperAdminStorage />} />
+                  <Route path="settings" element={<SuperAdminSettings />} />
                 </Route>
               </Route>
             </Route>
@@ -189,7 +193,9 @@ const App = () => (
                 <Route path="tests/new" element={<TestForm />} />
                 <Route path="tests/:id/edit" element={<TestForm />} />
                 <Route path="payments" element={<Finance />} />
+                <Route path="branding" element={<Branding />} />
                 <Route path="settings" element={<Settings />} />
+                <Route path="settings/integrations" element={<IntegrationsSettings />} />
                 <Route path="announcements" element={<Announcements />} />
                 <Route path="announcements/new" element={<AnnouncementForm />} />
                 <Route path="announcements/:id/edit" element={<AnnouncementForm />} />
