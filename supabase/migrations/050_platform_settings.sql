@@ -13,6 +13,20 @@ ON CONFLICT (id) DO NOTHING;
 -- Only super admins can read/write (service role used from edge functions)
 ALTER TABLE platform_settings ENABLE ROW LEVEL SECURITY;
 
--- No public access — only service role key (used by edge function) can read
-CREATE POLICY "service_role_only" ON platform_settings
-    USING (false);
+-- Allow Super Admins to manage platform settings
+CREATE POLICY "superadmins_manage_platform_settings" ON platform_settings
+    FOR ALL
+    TO authenticated
+    USING (
+        EXISTS (
+            SELECT 1 FROM public.users
+            WHERE users.id = auth.uid()
+            AND users.role = 'superadmin'
+        )
+    );
+
+-- Allow all authenticated users (like Coaching Admins) to read platform settings
+CREATE POLICY "authenticated_read_platform_settings" ON platform_settings
+    FOR SELECT
+    TO authenticated
+    USING (true);

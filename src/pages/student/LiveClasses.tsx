@@ -1,16 +1,22 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Radio, Calendar, Search, Video, Loader2, Clock, Lock } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 import { useLiveClasses, LiveClass } from '@/hooks/data/useLiveClasses';
 import { useBatches } from '@/hooks/data/useBatches';
 import { normalizeBatch } from '@/types/batch';
-import { YouTubeLivePlayer } from '@/components/video/YouTubeLivePlayer';
+const ZoomPlayer = lazy(() => import('@/components/student/ZoomPlayer').then(m => ({ default: m.ZoomPlayer })));
+const YouTubePlayer = lazy(() => import('@/components/student/YouTubePlayer').then(m => ({ default: m.YouTubePlayer })));
+
 import { format } from 'date-fns';
 import { ASSETS } from '@/config/assets';
 
 export const StudentLiveClasses = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [selectedClass, setSelectedClass] = useState<LiveClass | null>(null);
+    const [activeZoom, setActiveZoom] = useState<{ meetingNumber: string; password: string; title: string } | null>(null);
+    const [activeYouTube, setActiveYouTube] = useState<{ videoId: string; title: string; isLive: boolean } | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
 
     const { data: rawBatches = [], isLoading: batchesLoading } = useBatches();
@@ -61,18 +67,57 @@ export const StudentLiveClasses = () => {
         catch { return ''; }
     };
 
+    const handleJoinClass = (liveClass: LiveClass) => {
+        if (liveClass.platform === 'zoom' && liveClass.zoom_meeting_number) {
+            setActiveZoom({
+                meetingNumber: liveClass.zoom_meeting_number,
+                password: liveClass.zoom_meeting_password || '',
+                title: liveClass.title
+            });
+            return;
+        }
+        if (liveClass.platform === 'youtube' && liveClass.youtube_video_id) {
+            setActiveYouTube({ videoId: liveClass.youtube_video_id, title: liveClass.title, isLive: true });
+            return;
+        }
+        if (liveClass.platform === 'youtube' && liveClass.meeting_link?.includes('youtube.com/watch?v=')) {
+            const videoId = new URL(liveClass.meeting_link).searchParams.get('v');
+            if (videoId) {
+                setActiveYouTube({ videoId, title: liveClass.title, isLive: true });
+                return;
+            }
+        }
+        if (liveClass.meeting_link) {
+            window.open(liveClass.meeting_link, '_blank', 'noopener');
+            return;
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-50 pb-20 md:pb-8">
-            {/* Full-screen video player modal */}
-            {selectedClass && selectedClass.meeting_link && (
-                <div className="fixed inset-0 z-50 bg-black">
-                    <YouTubeLivePlayer
-                        videoId={selectedClass.meeting_link}
-                        title={selectedClass.title}
-                        isLive={selectedClass.status === 'live'}
-                        onClose={() => setSelectedClass(null)}
+            {/* Zoom Player Overlay */}
+            {activeZoom && (
+                <Suspense fallback={<div className="fixed inset-0 bg-black flex items-center justify-center text-white text-lg z-[100]">Loading Zoom...</div>}>
+                    <ZoomPlayer
+                        meetingNumber={activeZoom.meetingNumber}
+                        password={activeZoom.password}
+                        userName={(user as any)?.user_metadata?.full_name || user?.name || 'Student'}
+                        userEmail={user?.email}
+                        onClose={() => setActiveZoom(null)}
                     />
-                </div>
+                </Suspense>
+            )}
+
+            {/* YouTube Player Overlay */}
+            {activeYouTube && (
+                <Suspense fallback={null}>
+                    <YouTubePlayer
+                        videoId={activeYouTube.videoId}
+                        title={activeYouTube.title}
+                        isLive={activeYouTube.isLive}
+                        onClose={() => setActiveYouTube(null)}
+                    />
+                </Suspense>
             )}
 
             {/* Header */}
@@ -172,7 +217,7 @@ export const StudentLiveClasses = () => {
                                                 </div>
                                                 <button
                                                     disabled={!hasStarted}
-                                                    onClick={() => hasStarted && liveClass.meeting_link ? setSelectedClass(liveClass) : null}
+                                                    onClick={() => hasStarted ? handleJoinClass(liveClass) : null}
                                                     className={`px-5 py-2 rounded-xl font-semibold text-sm transition-colors flex-shrink-0 flex items-center gap-2 ${hasStarted
                                                         ? 'bg-red-500 text-white hover:bg-red-600 cursor-pointer'
                                                         : 'bg-gray-300 text-gray-500 cursor-not-allowed'

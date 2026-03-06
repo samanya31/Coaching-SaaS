@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import {
     BookOpen,
@@ -29,6 +29,9 @@ import { format } from 'date-fns';
 // Assets
 import { ASSETS } from '@/config/assets';
 
+const ZoomPlayer = lazy(() => import('@/components/student/ZoomPlayer').then(m => ({ default: m.ZoomPlayer })));
+const YouTubePlayer = lazy(() => import('@/components/student/YouTubePlayer').then(m => ({ default: m.YouTubePlayer })));
+
 export const StudentDashboard = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
@@ -37,6 +40,9 @@ export const StudentDashboard = () => {
     const { data: banners = [] } = useBanners();
     const { data: announcements = [] } = useAnnouncements();
     const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
+
+    const [activeZoom, setActiveZoom] = useState<{ meetingNumber: string; password: string; title: string } | null>(null);
+    const [activeYouTube, setActiveYouTube] = useState<{ videoId: string; title: string; isLive: boolean } | null>(null);
 
     // Dynamic banner gradient from admin branding settings
     const bannerGradient = coaching?.settings?.banner_gradient
@@ -132,6 +138,32 @@ export const StudentDashboard = () => {
             };
         });
     }, [allLiveClasses, enrolledBatchIds]);
+
+    const handleJoinClass = (liveClass: LiveClass) => {
+        if (liveClass.platform === 'zoom' && liveClass.zoom_meeting_number) {
+            setActiveZoom({
+                meetingNumber: liveClass.zoom_meeting_number,
+                password: liveClass.zoom_meeting_password || '',
+                title: liveClass.title
+            });
+            return;
+        }
+        if (liveClass.platform === 'youtube' && liveClass.youtube_video_id) {
+            setActiveYouTube({ videoId: liveClass.youtube_video_id, title: liveClass.title, isLive: true });
+            return;
+        }
+        if (liveClass.platform === 'youtube' && liveClass.meeting_link?.includes('youtube.com/watch?v=')) {
+            const videoId = new URL(liveClass.meeting_link).searchParams.get('v');
+            if (videoId) {
+                setActiveYouTube({ videoId, title: liveClass.title, isLive: true });
+                return;
+            }
+        }
+        if (liveClass.meeting_link) {
+            window.open(liveClass.meeting_link, '_blank', 'noopener');
+            return;
+        }
+    };
 
     const quickActions = [
         {
@@ -350,14 +382,8 @@ export const StudentDashboard = () => {
                                             <button
                                                 disabled={!hasStarted}
                                                 onClick={() => {
-                                                    if (hasStarted && cls.liveClass?.meeting_link) {
-                                                        navigate(`/student/player/${cls.id}`, {
-                                                            state: {
-                                                                videoUrl: cls.liveClass.meeting_link,
-                                                                classTitle: `${cls.subject} - ${cls.topic}`,
-                                                                batchTitle: null
-                                                            }
-                                                        });
+                                                    if (hasStarted && cls.liveClass) {
+                                                        handleJoinClass(cls.liveClass);
                                                     } else if (hasStarted) {
                                                         navigate('/student/dashboard/live-classes');
                                                     }
@@ -430,6 +456,31 @@ export const StudentDashboard = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Zoom Player Overlay */}
+            {activeZoom && (
+                <Suspense fallback={<div className="fixed inset-0 bg-black flex items-center justify-center text-white text-lg z-[100]">Loading Zoom...</div>}>
+                    <ZoomPlayer
+                        meetingNumber={activeZoom.meetingNumber}
+                        password={activeZoom.password}
+                        userName={(user as any)?.user_metadata?.full_name || user?.name || 'Student'}
+                        userEmail={user?.email}
+                        onClose={() => setActiveZoom(null)}
+                    />
+                </Suspense>
+            )}
+
+            {/* YouTube Player Overlay */}
+            {activeYouTube && (
+                <Suspense fallback={null}>
+                    <YouTubePlayer
+                        videoId={activeYouTube.videoId}
+                        title={activeYouTube.title}
+                        isLive={activeYouTube.isLive}
+                        onClose={() => setActiveYouTube(null)}
+                    />
+                </Suspense>
+            )}
         </div>
     );
 };

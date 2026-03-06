@@ -2,7 +2,7 @@ import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.examedge.student',
-  appName: 'Vidya Yantra Student',
+  appName: 'Vidya Yantra',
   webDir: 'dist',
   server: {
     androidScheme: 'https',
