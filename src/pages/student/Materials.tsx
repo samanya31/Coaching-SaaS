@@ -28,7 +28,11 @@ export const StudentMaterials = () => {
         const matchesSearch = material.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
             material.batch?.title.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesType = selectedType === 'all' || material.file_type.toLowerCase().includes(selectedType);
-        return matchesSearch && matchesType;
+
+        // Strictly show only Current Affairs (public materials)
+        const matchesCategory = material.is_public === true;
+
+        return matchesSearch && matchesType && matchesCategory;
     });
 
     if (isLoading) {
@@ -54,8 +58,8 @@ export const StudentMaterials = () => {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-[#1E3A8A] mb-2">Current Affairs & Materials</h1>
-                    <p className="text-[#6B7280]">Access daily current affairs and resources from your enrolled batches</p>
+                    <h1 className="text-3xl font-bold text-[#1E3A8A] mb-2">Current Affairs</h1>
+                    <p className="text-[#6B7280]">Access daily current affairs resources</p>
                 </div>
             </div>
 

@@ -12,6 +12,11 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { useTenant } from '@/app/providers/TenantProvider';
+import { toast } from 'sonner';
+import r2 from '@/services/r2.service';
+import { useRef } from 'react';
+import { Upload, X } from 'lucide-react';
 
 export const BatchForm = () => {
     const { id } = useParams();
@@ -33,8 +38,38 @@ export const BatchForm = () => {
         price: '',
         startDate: '',
         endDate: '',
-        thumbnail: '' // Added thumbnail
+        thumbnail: '' // URL of the uploaded thumbnail
     });
+
+    const { coaching } = useTenant();
+    const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+    const [thumbnailPreview, setThumbnailPreview] = useState<string>('');
+    const [isUploadingThumbnail, setIsUploadingThumbnail] = useState(false);
+    const thumbnailInputRef = useRef<HTMLInputElement>(null);
+
+    const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setThumbnailFile(file);
+        const reader = new FileReader();
+        reader.onloadend = () => setThumbnailPreview(reader.result as string);
+        reader.readAsDataURL(file);
+    };
+
+    const handleThumbnailUpload = async (): Promise<string | null> => {
+        if (!thumbnailFile || !coaching?.id) return null;
+        setIsUploadingThumbnail(true);
+        try {
+            // Upload to R2: institutes/{coachingId}/thumbnails/{uuid}-{filename}
+            const publicUrl = await r2.upload(coaching.id, 'thumbnails', thumbnailFile, { entityType: 'batch' });
+            return publicUrl;
+        } catch (err: any) {
+            toast.error('Thumbnail upload failed: ' + err.message);
+            return null;
+        } finally {
+            setIsUploadingThumbnail(false);
+        }
+    };
 
     useEffect(() => {
         if (isEdit && existingBatch) {
@@ -48,6 +83,9 @@ export const BatchForm = () => {
                 endDate: existingBatch.end_date?.split('T')[0] || '',
                 thumbnail: existingBatch.thumbnail_url || existingBatch.thumbnail || ''
             });
+            if (existingBatch.thumbnail_url || existingBatch.thumbnail) {
+                setThumbnailPreview(existingBatch.thumbnail_url || existingBatch.thumbnail || '');
+            }
         }
     }, [isEdit, existingBatch]);
 
@@ -99,6 +137,19 @@ export const BatchForm = () => {
             return;
         }
 
+        let finalThumbnailUrl = formData.thumbnail;
+
+        // Upload the new thumbnail if one was selected
+        if (thumbnailFile) {
+            const uploadedUrl = await handleThumbnailUpload();
+            if (uploadedUrl) {
+                finalThumbnailUrl = uploadedUrl;
+            } else {
+                // Return early if upload fails
+                return;
+            }
+        }
+
         const selectedInstructor = instructors.find(i => i.id === formData.instructorId);
 
         const batchData = {
@@ -109,7 +160,7 @@ export const BatchForm = () => {
             fee_currency: 'INR',
             start_date: new Date(formData.startDate).toISOString(),
             end_date: new Date(formData.endDate).toISOString(),
-            thumbnail_url: formData.thumbnail, // Save thumbnail URL
+            thumbnail_url: finalThumbnailUrl, // Save thumbnail URL
             instructor_id: formData.instructorId, // New field
             tags: [],
             metadata: {
@@ -180,20 +231,59 @@ export const BatchForm = () => {
                         {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
                     </div>
 
-                    {/* Thumbnail URL */}
+                    {/* Thumbnail Upload */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Thumbnail URL
+                            Batch Thumbnail
                         </label>
-                        <div className="relative">
-                            <Image className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                            <input
-                                type="text"
-                                value={formData.thumbnail}
-                                onChange={(e) => handleChange('thumbnail', e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                placeholder="https://example.com/image.jpg"
-                            />
+                        <div className="flex items-start gap-6">
+                            {/* Preview */}
+                            <div className="w-48 h-32 rounded-lg border-2 border-dashed border-gray-200 flex items-center justify-center bg-gray-50 overflow-hidden flex-shrink-0">
+                                {thumbnailPreview ? (
+                                    <img src={thumbnailPreview} alt="Thumbnail Preview" className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="text-center text-gray-400">
+                                        <Image className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                                        <span className="text-xs">No image</span>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="space-y-2 flex-1">
+                                <div className="flex gap-2">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => thumbnailInputRef.current?.click()}
+                                        className="flex items-center gap-2"
+                                    >
+                                        <Upload className="w-4 h-4" />
+                                        {thumbnailFile || thumbnailPreview ? 'Change Image' : 'Upload Image'}
+                                    </Button>
+                                    {(thumbnailPreview || thumbnailFile) && (
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={() => {
+                                                setThumbnailFile(null);
+                                                setThumbnailPreview('');
+                                                setFormData(prev => ({ ...prev, thumbnail: '' }));
+                                            }}
+                                            className="text-red-500 border-red-200"
+                                        >
+                                            <X className="w-4 h-4" />
+                                        </Button>
+                                    )}
+                                </div>
+                                {thumbnailFile && <p className="text-xs text-indigo-600">✓ {thumbnailFile.name} ready to upload</p>}
+                                <p className="text-xs text-gray-400">Recommended size: 1280x720px (16:9). Max 5MB.</p>
+                                <input
+                                    ref={thumbnailInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={handleThumbnailChange}
+                                />
+                            </div>
                         </div>
                     </div>
 
@@ -328,12 +418,17 @@ export const BatchForm = () => {
                         type="button"
                         variant="outline"
                         onClick={() => navigate('/admin/dashboard/batches')}
+                        disabled={isUploadingThumbnail}
                     >
                         Cancel
                     </Button>
-                    <Button type="submit" className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700">
+                    <Button
+                        type="submit"
+                        className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+                        disabled={isUploadingThumbnail}
+                    >
                         <Save className="w-4 h-4 mr-2" />
-                        {isEdit ? 'Update Batch' : 'Create Batch'}
+                        {isUploadingThumbnail ? 'Uploading Image...' : (isEdit ? 'Update Batch' : 'Create Batch')}
                     </Button>
                 </div>
             </form>

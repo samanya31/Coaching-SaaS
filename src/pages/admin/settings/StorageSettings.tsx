@@ -18,6 +18,7 @@ const CAT_ICON: Record<string, any> = {
     materials: FileText,
     logos: Tag,
     avatars: User,
+    banners: Image,
 };
 
 const CAT_COLOR: Record<string, string> = {
@@ -26,6 +27,7 @@ const CAT_COLOR: Record<string, string> = {
     materials: 'text-orange-500 bg-orange-50',
     logos: 'text-yellow-600 bg-yellow-50',
     avatars: 'text-emerald-600 bg-emerald-50',
+    banners: 'text-blue-600 bg-blue-50',
 };
 
 const BAR_COLOR: Record<string, string> = {
@@ -34,6 +36,7 @@ const BAR_COLOR: Record<string, string> = {
     materials: 'bg-orange-400',
     logos: 'bg-yellow-400',
     avatars: 'bg-emerald-500',
+    banners: 'bg-blue-500',
 };
 
 // ── File Row ───────────────────────────────────────────────────────
@@ -132,7 +135,7 @@ export const StorageSettings = () => {
         );
     }
 
-    const categories = ['videos', 'thumbnails', 'materials', 'logos', 'avatars'];
+    const categories = ['videos', 'thumbnails', 'materials', 'logos', 'avatars', 'banners'];
 
     return (
         <div className="p-6 space-y-8 max-w-5xl">

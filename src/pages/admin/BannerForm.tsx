@@ -1,23 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Save, Image as ImageIcon, Link as LinkIcon, Move, Calendar, FileText, Target, Type as TypeIcon } from 'lucide-react';
+import { ArrowLeft, Save, Image as ImageIcon, Link as LinkIcon, Move, Calendar, FileText, Target, Type as TypeIcon, Upload, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useBanner, useCreateBanner, useUpdateBanner } from '@/hooks/data/useBanners';
+import { useTenant } from '@/app/providers/TenantProvider';
+import r2 from '@/services/r2.service';
 import type { BannerType, BannerAudience } from '@/types/banner';
+import { useExamGoals } from '@/hooks/data/useExamGoals';
 
 const bannerTypes: { value: BannerType; label: string }[] = [
     { value: 'public_website', label: 'Public Website' },
     { value: 'student_dashboard', label: 'Student Dashboard' }
-];
-
-const targetAudiences: { value: BannerAudience; label: string }[] = [
-    { value: 'all', label: 'All' },
-    { value: 'jee', label: 'JEE' },
-    { value: 'neet', label: 'NEET' },
-    { value: 'upsc', label: 'UPSC' },
-    { value: 'foundation', label: 'Foundation' },
-    { value: 'ssc', label: 'SSC' },
-    { value: 'banking', label: 'Banking' }
 ];
 
 export const BannerForm = () => {
@@ -28,31 +21,34 @@ export const BannerForm = () => {
     const { data: existingBanner, isLoading } = useBanner(id || '');
     const createBanner = useCreateBanner();
     const updateBanner = useUpdateBanner();
+    const { coaching } = useTenant();
+    const { examGoals } = useExamGoals();
+
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
 
     const [formData, setFormData] = useState({
-        title: '',
-        description: '',
         imageUrl: '',
-        ctaText: 'Learn More',
-        ctaLink: '/',
         type: 'public_website' as BannerType,
-        targetAudience: 'all' as BannerAudience,
+        targetAudience: 'All' as BannerAudience,
         displayOrder: '0',
         startDate: '',
         endDate: '',
         isActive: true
     });
 
+    const dynamicTargetAudiences = [
+        { value: 'All', label: 'All' },
+        ...examGoals.map(goal => ({ value: goal.name, label: goal.name }))
+    ];
+
     useEffect(() => {
         if (isEdit && existingBanner) {
             setFormData({
-                title: existingBanner.title || '',
-                description: existingBanner.description || '',
                 imageUrl: existingBanner.image_url || '',
-                ctaText: existingBanner.cta_text || 'Learn More',
-                ctaLink: existingBanner.cta_link || '/',
                 type: existingBanner.type || 'public_website',
-                targetAudience: existingBanner.target_audience || 'all',
+                targetAudience: existingBanner.target_audience || 'All',
                 displayOrder: existingBanner.display_order?.toString() || '0',
                 startDate: existingBanner.start_date ? existingBanner.start_date.split('T')[0] : '',
                 endDate: existingBanner.end_date ? existingBanner.end_date.split('T')[0] : '',
@@ -63,13 +59,7 @@ export const BannerForm = () => {
 
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
-    // Demo images
-    const demoImages = [
-        'https://images.unsplash.com/photo-1620912189865-1e8a33f4c087?auto=format&fit=crop&q=80&w=2069',
-        'https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&q=80&w=2080',
-        'https://images.unsplash.com/photo-1589330694653-4a8b643beeae?auto=format&fit=crop&q=80&w=2070',
-        'https://images.unsplash.com/photo-1546410531-bb4caa6b424d?auto=format&fit=crop&q=80&w=2071'
-    ];
+
 
     const validateForm = () => {
         const newErrors: { [key: string]: string } = {};
@@ -93,12 +83,35 @@ export const BannerForm = () => {
             return;
         }
 
+        let finalImageUrl = formData.imageUrl;
+
+        // If user selected a local file, upload to R2 first
+        if (selectedFile && coaching?.id) {
+            setIsUploading(true);
+            setUploadProgress(0);
+            const progressInterval = setInterval(() => {
+                setUploadProgress(p => Math.min(p + 10, 90));
+            }, 300);
+
+            try {
+                finalImageUrl = await r2.upload(coaching.id, 'banners', selectedFile, {
+                    entityType: 'banner'
+                });
+                setUploadProgress(100);
+            } catch (error) {
+                console.error('Failed to upload banner image:', error);
+                alert('Image upload failed. Please try again.');
+                setIsUploading(false);
+                clearInterval(progressInterval);
+                return; // Stop form submission if upload fails
+            } finally {
+                clearInterval(progressInterval);
+                setIsUploading(false);
+            }
+        }
+
         const bannerData = {
-            title: formData.title || null,
-            description: formData.description || null,
-            image_url: formData.imageUrl,
-            cta_text: formData.ctaText || null,
-            cta_link: formData.ctaLink || null,
+            image_url: finalImageUrl,
             type: formData.type,
             target_audience: formData.targetAudience,
             display_order: parseInt(formData.displayOrder),
@@ -109,6 +122,14 @@ export const BannerForm = () => {
 
         try {
             if (isEdit && id) {
+                // If we uploaded a new image, delete the old one from R2
+                if (selectedFile && existingBanner?.image_url) {
+                    const oldUrl = existingBanner.image_url;
+                    // Only delete if it's an R2 URL and different from new URL
+                    if (oldUrl !== finalImageUrl && (oldUrl.includes('r2.dev') || oldUrl.includes('exam-edge-media'))) {
+                        void r2.remove(oldUrl); // Background removal
+                    }
+                }
                 await updateBanner.mutateAsync({ bannerId: id, updates: bannerData });
                 alert('Banner updated successfully!');
             } else {
@@ -126,9 +147,9 @@ export const BannerForm = () => {
         setFormData(prev => {
             const updated = { ...prev, [field]: value };
 
-            // Auto-set target audience to 'all' when type is 'public_website'
+            // Auto-set target audience to 'All' when type is 'public_website'
             if (field === 'type' && value === 'public_website') {
-                updated.targetAudience = 'all';
+                updated.targetAudience = 'All';
             }
 
             return updated;
@@ -172,95 +193,72 @@ export const BannerForm = () => {
                             <label className="block text-sm font-medium text-gray-700 mb-3">
                                 Banner Image <span className="text-red-500">*</span>
                             </label>
-                            <div className="relative">
+
+                            {/* File Upload Option */}
+                            <div className="mb-4">
+                                <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl cursor-pointer transition-colors ${selectedFile ? 'border-indigo-500 bg-indigo-50' : 'border-gray-300 bg-gray-50 hover:bg-gray-100 hover:border-indigo-400'}`}>
+                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                        <Upload className={`w-8 h-8 mb-2 ${selectedFile ? 'text-indigo-500' : 'text-gray-400'}`} />
+                                        <p className="mb-1 text-sm text-gray-500 font-semibold">
+                                            {selectedFile ? selectedFile.name : 'Click to upload from computer'}
+                                        </p>
+                                        <p className="text-xs text-gray-500">SVG, PNG, JPG or GIF (MAX. 5MB)</p>
+                                    </div>
+                                    <input
+                                        type="file"
+                                        className="hidden"
+                                        accept="image/*"
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                                setSelectedFile(file);
+                                                // Clear string URL if they pick a file
+                                                setFormData({ ...formData, imageUrl: URL.createObjectURL(file) });
+                                            }
+                                        }}
+                                    />
+                                </label>
+                            </div>
+
+                            <div className="flex items-center gap-4 my-2">
+                                <div className="h-px bg-gray-200 flex-1"></div>
+                                <span className="text-sm text-gray-400 font-medium">OR ENTER URL</span>
+                                <div className="h-px bg-gray-200 flex-1"></div>
+                            </div>
+
+                            <div className="relative mt-2">
                                 <ImageIcon className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
                                 <input
                                     type="text"
-                                    value={formData.imageUrl}
-                                    onChange={(e) => handleChange('imageUrl', e.target.value)}
-                                    className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${errors.imageUrl ? 'border-red-500' : 'border-gray-200'}`}
-                                    placeholder="Enter image URL"
+                                    value={!selectedFile ? formData.imageUrl : ''}
+                                    onChange={(e) => {
+                                        setSelectedFile(null); // Clear file if they type a URL
+                                        handleChange('imageUrl', e.target.value);
+                                    }}
+                                    className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${(errors.imageUrl && !selectedFile) ? 'border-red-500' : 'border-gray-200'} ${selectedFile ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : ''}`}
+                                    placeholder={selectedFile ? "Clear file selection to use URL..." : "Enter external image URL (https://...)"}
+                                    disabled={!!selectedFile}
                                 />
+                                {selectedFile && (
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setSelectedFile(null);
+                                            setFormData({ ...formData, imageUrl: '' });
+                                        }}
+                                        className="absolute right-3 top-3 text-red-500 hover:text-red-700 hover:bg-red-50 p-1 rounded transition-colors"
+                                        title="Clear uploaded file"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                )}
                             </div>
-                            {errors.imageUrl && <p className="text-red-500 text-sm mt-1">{errors.imageUrl}</p>}
+                            {(errors.imageUrl && !selectedFile) && <p className="text-red-500 text-sm mt-1">{errors.imageUrl}</p>}
 
-                            {/* Quick Select */}
-                            <div className="mt-4">
-                                <p className="text-xs text-gray-500 mb-2">Quick select:</p>
-                                <div className="grid grid-cols-4 gap-2">
-                                    {demoImages.map((img, index) => (
-                                        <button
-                                            key={index}
-                                            type="button"
-                                            onClick={() => handleChange('imageUrl', img)}
-                                            className={`h-20 rounded-lg overflow-hidden border-2 transition-all ${formData.imageUrl === img ? 'border-indigo-600 ring-2 ring-indigo-200' : 'border-gray-200 hover:border-indigo-300'}`}
-                                        >
-                                            <img src={img} alt={`Demo ${index + 1}`} className="w-full h-full object-cover" />
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
+
                         </div>
 
-                        {/* Content Fields */}
-                        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-4">
-                            {/* Title */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
-                                <div className="relative">
-                                    <TypeIcon className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
-                                    <input
-                                        type="text"
-                                        value={formData.title}
-                                        onChange={(e) => handleChange('title', e.target.value)}
-                                        className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                        placeholder="Enter banner title"
-                                    />
-                                </div>
-                            </div>
 
-                            {/* Description */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                                <div className="relative">
-                                    <FileText className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
-                                    <textarea
-                                        value={formData.description}
-                                        onChange={(e) => handleChange('description', e.target.value)}
-                                        className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
-                                        placeholder="Enter banner description"
-                                        rows={3}
-                                    />
-                                </div>
-                            </div>
-
-                            {/* CTA Text & Link */}
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">CTA Text</label>
-                                    <input
-                                        type="text"
-                                        value={formData.ctaText}
-                                        onChange={(e) => handleChange('ctaText', e.target.value)}
-                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                        placeholder="Learn More"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">CTA Link</label>
-                                    <div className="relative">
-                                        <LinkIcon className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
-                                        <input
-                                            type="text"
-                                            value={formData.ctaLink}
-                                            onChange={(e) => handleChange('ctaLink', e.target.value)}
-                                            className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                            placeholder="/"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
 
                         {/* Settings */}
                         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-4">
@@ -290,7 +288,7 @@ export const BannerForm = () => {
                                             disabled={formData.type === 'public_website'}
                                             className={`w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white ${formData.type === 'public_website' ? 'opacity-50 cursor-not-allowed' : ''}`}
                                         >
-                                            {targetAudiences.map(aud => (
+                                            {dynamicTargetAudiences.map(aud => (
                                                 <option key={aud.value} value={aud.value}>{aud.label}</option>
                                             ))}
                                         </select>
@@ -373,10 +371,10 @@ export const BannerForm = () => {
                             <Button
                                 type="submit"
                                 className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
-                                disabled={createBanner.isPending || updateBanner.isPending}
+                                disabled={createBanner.isPending || updateBanner.isPending || isUploading}
                             >
                                 <Save className="w-4 h-4 mr-2" />
-                                {createBanner.isPending || updateBanner.isPending ? 'Saving...' : (isEdit ? 'Update Banner' : 'Create Banner')}
+                                {isUploading ? `Uploading... ${uploadProgress}%` : (createBanner.isPending || updateBanner.isPending ? 'Saving...' : (isEdit ? 'Update Banner' : 'Create Banner'))}
                             </Button>
                         </div>
                     </div>
@@ -400,17 +398,7 @@ export const BannerForm = () => {
                                         <ImageIcon className="w-12 h-12 text-gray-300" />
                                     </div>
                                 )}
-                                {(formData.title || formData.description || formData.ctaText) && (
-                                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4">
-                                        {formData.title && <p className="text-white font-bold text-lg mb-1">{formData.title}</p>}
-                                        {formData.description && <p className="text-white/90 text-sm mb-2 line-clamp-2">{formData.description}</p>}
-                                        {formData.ctaText && (
-                                            <button className="bg-white text-gray-900 px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors">
-                                                {formData.ctaText}
-                                            </button>
-                                        )}
-                                    </div>
-                                )}
+
                             </div>
                             <div className="space-y-2 text-sm">
                                 <div className="flex justify-between">
@@ -419,7 +407,7 @@ export const BannerForm = () => {
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-gray-600">Audience:</span>
-                                    <span className="font-medium text-gray-900">{targetAudiences.find(a => a.value === formData.targetAudience)?.label}</span>
+                                    <span className="font-medium text-gray-900">{dynamicTargetAudiences.find(a => a.value === formData.targetAudience)?.label || formData.targetAudience}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-gray-600">Status:</span>

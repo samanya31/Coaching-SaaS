@@ -32,7 +32,7 @@ export const useStudyMaterials = (batchId?: string) => {
 
             const { data, error } = await supabase
                 .from('study_materials')
-                .select('*, uploader:users(full_name), batch:batches!fk_study_materials_batches(title:name)')
+                .select('*, uploader:users(full_name), batch:batches(title:name)')
                 .eq('batch_id', batchId)
                 .order('created_at', { ascending: false });
 
@@ -61,6 +61,7 @@ export const useCreateStudyMaterial = () => {
             description: string;
             file_url: string;
             is_public?: boolean;
+            uploaded_by?: string;
         }) => {
             // Determine file type from URL
             const fileType = vars.file_url.split('.').pop()?.toLowerCase() || 'file';
@@ -74,7 +75,8 @@ export const useCreateStudyMaterial = () => {
                     description: vars.description,
                     file_url: vars.file_url,
                     file_type: fileType,
-                    is_public: vars.is_public || false
+                    is_public: vars.is_public || false,
+                    uploaded_by: vars.uploaded_by
                 });
 
             if (error) {
@@ -162,11 +164,11 @@ export const useAllStudentStudyMaterials = () => {
             // 2. Fetch Materials using Parallel Queries (More robust than complex OR syntax)
 
             // Query A: Public Materials
-            // We use explicit FK reference !fk_study_materials_batches to match the new migration
+            // We use standard Supabase auto-resolution for the foreign key.
             // We select 'title:name' because the DB column is 'name' but frontend expects 'title'
             const publicQuery = supabase
                 .from('study_materials')
-                .select('*, batch:batches!fk_study_materials_batches(title:name)')
+                .select('*, batch:batches(title:name)')
                 .eq('is_public', true)
                 .order('created_at', { ascending: false });
 
@@ -175,8 +177,9 @@ export const useAllStudentStudyMaterials = () => {
             if (batchIds.length > 0) {
                 enrolledQuery = supabase
                     .from('study_materials')
-                    .select('*, batch:batches!fk_study_materials_batches(title:name)')
+                    .select('*, batch:batches(title:name)')
                     .in('batch_id', batchIds)
+                    .eq('is_public', false) // Crucial to prevent duplicates/leaks from accidentally public batch materials
                     .order('created_at', { ascending: false });
             }
 

@@ -21,9 +21,17 @@ export const BatchCard = ({ batch, index = 0 }: BatchCardProps) => {
                 <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
                     {/* Thumbnail */}
                     <div className="relative h-40 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden">
-                        <div className="absolute inset-0 flex items-center justify-center text-6xl">
-                            {batch.instructorAvatar}
-                        </div>
+                        {batch.thumbnail_url || batch.thumbnail ? (
+                            <img
+                                src={batch.thumbnail_url || batch.thumbnail}
+                                alt={batch.title}
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            <div className="absolute inset-0 flex items-center justify-center text-6xl">
+                                {batch.instructorAvatar}
+                            </div>
+                        )}
 
                         {/* Purchased Badge */}
                         {batch.isPurchased && (

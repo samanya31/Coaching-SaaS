@@ -14,7 +14,7 @@
 
 import { supabase } from '@/config/supabase';
 
-export type R2Category = 'videos' | 'thumbnails' | 'materials' | 'logos' | 'avatars';
+export type R2Category = 'videos' | 'thumbnails' | 'materials' | 'logos' | 'avatars' | 'banners';
 
 export interface UploadOptions {
     /** Optional sub-folder inside the category, e.g. courseId for videos, userId for avatars */

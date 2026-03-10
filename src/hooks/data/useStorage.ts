@@ -32,6 +32,7 @@ const FORMAT_CATEGORY: Record<string, string> = {
     materials: '📄 Materials',
     logos: '🏷️ Logos',
     avatars: '👤 Avatars',
+    banners: '🎨 Banners',
 };
 
 export const useCategoryLabel = (cat: string) => FORMAT_CATEGORY[cat] ?? cat;

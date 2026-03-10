@@ -54,10 +54,10 @@ export const StudentDashboard = () => {
 
     // Filter banners for Student Dashboard
     const studentBanners = banners.filter((b: any) =>
-        b.isActive &&
-        b.type === 'student' &&
-        (b.targetAudience === 'All' || b.targetAudience === selectedGoal.name)
-    ).sort((a: any, b: any) => a.displayOrder - b.displayOrder);
+        b.is_active &&
+        b.type === 'student_dashboard' &&
+        (b.target_audience === 'All' || b.target_audience === selectedGoal?.name)
+    ).sort((a: any, b: any) => (a.display_order || 0) - (b.display_order || 0));
 
     // Filter announcements (assuming 'active' or similar field exists, or just show recent)
     // For now, showing all or filtering by target audience if applicable in schema
@@ -264,6 +264,37 @@ export const StudentDashboard = () => {
                 </div>
             </motion.div>
 
+            {/* Banners Carousel (Moved up per user request) */}
+            {studentBanners.length > 0 && (
+                <div className="bg-white rounded-2xl p-2 shadow-sm border border-slate-100">
+                    <div className="relative rounded-xl overflow-hidden group w-full h-auto">
+                        <div
+                            className="flex transition-transform duration-500 h-full w-full"
+                            style={{ transform: `translateX(-${currentBannerIndex * 100}%)` }}
+                        >
+                            {studentBanners.map((banner: any) => (
+                                <div key={banner.id} className="min-w-full relative h-full flex items-center justify-center">
+                                    <img
+                                        src={banner.image_url}
+                                        alt=""
+                                        className="w-full h-auto max-h-[500px] object-contain"
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                        {/* Indicators */}
+                        <div className="absolute bottom-3 md:bottom-5 left-1/2 -translate-x-1/2 flex gap-1.5 md:gap-2">
+                            {studentBanners.map((_: any, idx: number) => (
+                                <div
+                                    key={idx}
+                                    className={`w-1.5 h-1.5 md:w-2 md:h-2 rounded-full transition-all ${currentBannerIndex === idx ? 'bg-white w-4 md:w-6' : 'bg-white/50'}`}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Quick Actions Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                 {quickActions.map((action, index) => (
@@ -299,45 +330,6 @@ export const StudentDashboard = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
                 {/* Main Content - Left */}
                 <div className="lg:col-span-2 space-y-8">
-                    {/* Banners Carousel */}
-                    {studentBanners.length > 0 && (
-                        <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
-                            <div className="flex items-center gap-2 mb-4 px-2">
-                                <Award className="w-5 h-5 text-amber-500" />
-                                <h3 className="font-bold text-slate-800">Featured Updates</h3>
-                            </div>
-                            <div className="relative rounded-xl overflow-hidden aspect-[21/9] group">
-                                <div
-                                    className="flex transition-transform duration-500 h-full"
-                                    style={{ transform: `translateX(-${currentBannerIndex * 100}%)` }}
-                                >
-                                    {studentBanners.map((banner: any) => (
-                                        <div key={banner.id} className="min-w-full relative h-full">
-                                            <img
-                                                src={banner.imageUrl}
-                                                alt={banner.title}
-                                                className="w-full h-full object-cover"
-                                            />
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-6 text-white">
-                                                <h3 className="text-xl font-bold mb-1">{banner.title}</h3>
-                                                <p className="text-sm text-white/90 line-clamp-1">{banner.description}</p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                                {/* Indicators */}
-                                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-                                    {studentBanners.map((_: any, idx: number) => (
-                                        <div
-                                            key={idx}
-                                            className={`w-1.5 h-1.5 rounded-full transition-all ${currentBannerIndex === idx ? 'bg-white w-4' : 'bg-white/50'}`}
-                                        />
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
                     {/* Today's Schedule */}
                     <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
                         <div className="flex items-center justify-between mb-6">

@@ -49,7 +49,7 @@ export const BatchDetail = () => {
     const { data: studyMaterials = [], isLoading: isMaterialsLoading } = useStudyMaterials(id);
     const { mutate: deleteLiveClass } = useDeleteLiveClass();
     const { mutate: deleteCourse } = useDeleteCourse();
-    const { mutate: createMaterial, isPending: isCreatingMaterial } = useCreateStudyMaterial();
+    const { mutateAsync: createMaterialAsync, isPending: isCreatingMaterial } = useCreateStudyMaterial();
     const { mutate: deleteMaterial } = useDeleteStudyMaterial();
 
     const isLoading = isBatchLoading || isStudentsLoading || isClassesLoading || isCoursesLoading || isMaterialsLoading;
@@ -76,6 +76,20 @@ export const BatchDetail = () => {
         try {
             let fileUrl = materialForm.file_url;
 
+            // Resolve actual uploader ID (useAuth is empty for Admins, so fallback to localStorage)
+            let actualUploaderId = user?.id;
+            if (!actualUploaderId) {
+                const adminStr = localStorage.getItem('adminUser');
+                if (adminStr) {
+                    try {
+                        const adminUser = JSON.parse(adminStr);
+                        actualUploaderId = adminUser.id;
+                    } catch (e) {
+                        console.error('Failed to parse adminUser', e);
+                    }
+                }
+            }
+
             if (uploadMode === 'file' && selectedFile && coachingId) {
                 setIsUploading(true);
                 const progressInterval = setInterval(() => {
@@ -86,7 +100,7 @@ export const BatchDetail = () => {
                     fileUrl = await r2.upload(coachingId, 'materials', selectedFile, {
                         subFolder: id || 'batch',
                         entityType: 'study_material',
-                        uploadedBy: user?.id
+                        uploadedBy: actualUploaderId
                     });
                     setUploadProgress(100);
                 } finally {
@@ -95,26 +109,35 @@ export const BatchDetail = () => {
                 }
             }
 
-            createMaterial({
+            await createMaterialAsync({
                 batch_id: materialForm.is_public ? undefined : id!,
                 coaching_id: batch.coaching_id,
                 title: materialForm.title,
                 description: materialForm.description,
                 file_url: fileUrl,
-                is_public: materialForm.is_public
-            }, {
-                onSuccess: () => {
-                    setIsAddMaterialOpen(false);
-                    setMaterialForm({ title: '', description: '', file_url: '', is_public: false });
-                    setSelectedFile(null);
-                    setUploadProgress(0);
-                    setUploadMode('file');
-                    toast.success("Material added successfully!");
-                }
+                is_public: materialForm.is_public,
+                uploaded_by: actualUploaderId
             });
+
+            // Make the 100% visible before closing
+            setUploadProgress(100);
+            toast.success("Material added successfully!");
+
+            // Wait a brief moment so the user sees the progress bar hit 100%
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            setIsAddMaterialOpen(false);
+            setMaterialForm({ title: '', description: '', file_url: '', is_public: false });
+            setSelectedFile(null);
+            setUploadProgress(0);
+            setUploadMode('file');
+
         } catch (error: any) {
             console.error('Failed to add material:', error);
             toast.error(error.message || "Failed to add material");
+            // Also ensure we reset upload state on failure if we were uploading
+            setIsUploading(false);
+            setUploadProgress(0);
         }
     };
 

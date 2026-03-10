@@ -1,18 +1,12 @@
 export type BannerType = 'public_website' | 'student_dashboard';
-export type BannerAudience = 'all' | 'jee' | 'neet' | 'upsc' | 'foundation' | 'ssc' | 'banking';
+export type BannerAudience = string;
 
 export interface Banner {
     id: string;
     coaching_id: string;
 
-    // Image & Content
+    // Image
     image_url: string;
-    title: string | null;
-    description: string | null;
-
-    // Call to Action
-    cta_text: string | null;
-    cta_link: string | null;
 
     // Categorization
     type: BannerType;

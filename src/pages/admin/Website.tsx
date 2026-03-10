@@ -43,21 +43,36 @@ export const Website = () => {
 
     // Filter banners
     const filteredBanners = banners.filter(banner => {
-        const matchesSearch = (banner.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (banner.description || '').toLowerCase().includes(searchQuery.toLowerCase());
         const matchesType = selectedType === 'all' || banner.type === selectedType;
-        const matchesAudience = selectedAudience === 'all' || banner.target_audience === selectedAudience;
+        const matchesAudience = selectedAudience === 'all' || banner.target_audience.toLowerCase() === selectedAudience.toLowerCase();
+
+        // Search by image URL or audience if search query exists
+        const matchesSearch = !searchQuery ||
+            banner.image_url.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            banner.target_audience.toLowerCase().includes(searchQuery.toLowerCase());
+
         return matchesSearch && matchesType && matchesAudience;
     });
 
-    const handleDelete = (id: string, title: string | null) => {
-        if (confirm(`Are you sure you want to delete banner "${title || 'Untitled'}"?`)) {
+    const handleDelete = (id: string) => {
+        if (confirm(`Are you sure you want to delete this banner?`)) {
             deleteBanner(id);
         }
     };
 
     const handleToggleStatus = (id: string, currentStatus: boolean) => {
         toggleStatus({ bannerId: id, isActive: !currentStatus });
+    };
+
+    const expiredBanners = banners.filter(b => b.end_date && new Date(b.end_date) < new Date());
+
+    const handleCleanupExpired = async () => {
+        if (confirm(`Are you sure you want to delete all ${expiredBanners.length} expired banners? This will also remove their images from R2 storage.`)) {
+            for (const banner of expiredBanners) {
+                deleteBanner(banner.id);
+            }
+            alert('Expired banners cleaned up successfully!');
+        }
     };
 
     return (
@@ -68,12 +83,24 @@ export const Website = () => {
                     <h1 className="text-3xl font-bold text-gray-900">Website Manager</h1>
                     <p className="text-gray-600 mt-1">Manage homepage banners and promotional content</p>
                 </div>
-                <Link to="/admin/dashboard/website/new">
-                    <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700">
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add New Banner
-                    </Button>
-                </Link>
+                <div className="flex items-center gap-3">
+                    {expiredBanners.length > 0 && (
+                        <Button
+                            variant="outline"
+                            className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+                            onClick={handleCleanupExpired}
+                        >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Clean Up Expired ({expiredBanners.length})
+                        </Button>
+                    )}
+                    <Link to="/admin/dashboard/website/new">
+                        <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700">
+                            <Plus className="w-4 h-4 mr-2" />
+                            Add New Banner
+                        </Button>
+                    </Link>
+                </div>
             </div>
 
             {/* Stats Cards */}
@@ -178,7 +205,7 @@ export const Website = () => {
                             <div className="relative h-48 bg-gray-100">
                                 <img
                                     src={banner.image_url}
-                                    alt={banner.title || 'Banner'}
+                                    alt="Banner"
                                     className="w-full h-full object-cover"
                                     onError={(e) => {
                                         (e.target as HTMLImageElement).src = 'https://placehold.co/400x200?text=No+Image';
@@ -196,13 +223,8 @@ export const Website = () => {
                             <div className="p-4">
                                 <div className="mb-3">
                                     <h3 className="font-semibold text-gray-900 line-clamp-1 text-base mb-1">
-                                        {banner.title || 'Untitled Banner'}
+                                        {banner.type === 'public_website' ? 'Public Website' : 'Student Dashboard'} Banner
                                     </h3>
-                                    {banner.description && (
-                                        <p className="text-xs text-gray-500 line-clamp-2 mb-2">
-                                            {banner.description}
-                                        </p>
-                                    )}
                                     <div className="flex items-center gap-2 flex-wrap">
                                         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700">
                                             {banner.type === 'public_website' ? 'Public' : 'Dashboard'}
@@ -237,7 +259,7 @@ export const Website = () => {
                                         variant="ghost"
                                         size="sm"
                                         className="text-xs text-red-600 hover:text-red-700"
-                                        onClick={() => handleDelete(banner.id, banner.title)}
+                                        onClick={() => handleDelete(banner.id)}
                                     >
                                         <Trash2 className="w-3.5 h-3.5 mr-1" />
                                         Delete

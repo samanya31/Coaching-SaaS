@@ -7,63 +7,24 @@ import { normalizeBatch } from '@/types/batch';
 import { supabase } from '@/config/supabase';
 import { useTenant } from '@/app/providers/TenantProvider';
 import { ASSETS } from '@/config/assets';
+import { useExamGoal } from '@/contexts/ExamGoalContext';
 
 export const Batches = () => {
-    const [selectedGoal, setSelectedGoal] = useState<string>('NEET');
+    const { selectedGoal, availableGoals, setSelectedGoal, isLoading: isLoadingGoals } = useExamGoal();
     const [searchQuery, setSearchQuery] = useState('');
-    const [examGoals, setExamGoals] = useState<string[]>([]);
-    const [isLoadingGoals, setIsLoadingGoals] = useState(true);
 
     const { coachingId } = useTenant();
     const { data: rawBatches = [] } = useBatches();
     // Normalize batches to ensure compatibility with UI components expecting camelCase
     const allBatches = useMemo(() => rawBatches.map(normalizeBatch), [rawBatches]);
 
-    // Get selected exam goal from localStorage (set by ExamGoalSelector)
-    useEffect(() => {
-        const savedGoal = localStorage.getItem('selectedExamGoal');
-        if (savedGoal) {
-            setSelectedGoal(savedGoal);
-        }
-    }, []);
-
-    // Fetch active exam goals for this institute
-    useEffect(() => {
-        const fetchGoals = async () => {
-            if (!coachingId) return;
-            try {
-                const { data } = await supabase
-                    .from('exam_goals')
-                    .select('name')
-                    .eq('coaching_id', coachingId)
-                    .order('name', { ascending: true });
-
-                if (data && data.length > 0) {
-                    const goalNames = data.map(g => g.name);
-                    setExamGoals(goalNames);
-                    // If current selected goal is not in the list, pick the first one
-                    const savedGoal = localStorage.getItem('selectedExamGoal');
-                    if (!savedGoal || !goalNames.includes(savedGoal)) {
-                        setSelectedGoal(goalNames[0]);
-                    }
-                }
-            } catch (err) {
-                console.error('Error fetching goals:', err);
-            } finally {
-                setIsLoadingGoals(false);
-            }
-        };
-
-        fetchGoals();
-    }, [coachingId]);
-
     // Filter batches when goal or search changes
     // We derive this during render to avoid useEffect synchronization loops
     const filteredBatches = useMemo(() => {
         let result = allBatches.filter((batch) =>
-            batch.examGoal === selectedGoal ||
-            batch.title?.includes(selectedGoal) ||
-            batch.exam_goal === selectedGoal // fallback
+            batch.examGoal === selectedGoal.name ||
+            batch.title?.includes(selectedGoal.name) ||
+            batch.exam_goal === selectedGoal.name // fallback
         );
 
         if (searchQuery) {
@@ -136,19 +97,19 @@ export const Batches = () => {
                         <span className="text-sm font-medium text-gray-600">Filter by Exam:</span>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                        {examGoals.map((goal) => (
+                        {availableGoals.map((goal) => (
                             <button
-                                key={goal}
+                                key={goal.id}
                                 onClick={() => setSelectedGoal(goal)}
                                 className={`
                   px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200
-                  ${selectedGoal === goal
+                  ${selectedGoal.id === goal.id
                                         ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200'
                                         : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
                                     }
                 `}
                             >
-                                {goal}
+                                {goal.name}
                             </button>
                         ))}
                     </div>
@@ -156,7 +117,7 @@ export const Batches = () => {
 
                 {/* Results Count */}
                 <div className="mb-4 text-sm text-gray-600">
-                    Found <span className="font-semibold text-gray-900">{filteredBatches.length}</span> batches for {selectedGoal}
+                    Found <span className="font-semibold text-gray-900">{filteredBatches.length}</span> batches for {selectedGoal.name}
                 </div>
 
                 {/* Batches Grid */}
