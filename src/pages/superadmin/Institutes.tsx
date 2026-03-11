@@ -12,13 +12,13 @@ import { supabase } from '@/config/supabase';
 import { useQueryClient } from '@tanstack/react-query';
 
 // ── Helpers ──────────────────────────────────────────────────────────
-const PLANS = ['free', 'starter', 'pro', 'enterprise'] as const;
+const PLANS = ['basic', 'pro', 'advanced'] as const;
 const STATUSES = ['active', 'suspended', 'trial', 'expired'] as const;
 
 const planBadge: Record<string, string> = {
-    free: 'bg-gray-100 text-gray-600',
-    starter: 'bg-blue-100 text-blue-700',
+    basic: 'bg-gray-100 text-gray-600',
     pro: 'bg-indigo-100 text-indigo-700',
+    advanced: 'bg-amber-100 text-amber-700',
     enterprise: 'bg-purple-100 text-purple-800',
 };
 
@@ -51,9 +51,12 @@ const ActionMenu = ({ inst }: { inst: Institute }) => {
         setOpen(false);
     };
 
-    const assignPlan = async (planId: string) => {
+    const assignPlan = async (p: any) => {
         setAssigningPlan(true);
-        await supabase.from('coachings').update({ plan_id: planId }).eq('id', inst.id);
+        await supabase.from('coachings').update({
+            plan_id: p.id,
+            plan: p.name.toLowerCase()
+        }).eq('id', inst.id);
         qc.invalidateQueries({ queryKey: ['superadmin-institutes'] });
         setAssigningPlan(false);
         setOpen(false);
@@ -89,7 +92,7 @@ const ActionMenu = ({ inst }: { inst: Institute }) => {
                                     {plans.map(p => (
                                         <button
                                             key={p.id}
-                                            onClick={() => assignPlan(p.id)}
+                                            onClick={() => assignPlan(p)}
                                             className={`text-[11px] px-2 py-0.5 rounded-full capitalize font-medium border transition-all ${inst.plan_id === p.id
                                                 ? 'bg-indigo-600 text-white border-indigo-600'
                                                 : 'border-gray-200 hover:border-indigo-400 hover:text-indigo-600'

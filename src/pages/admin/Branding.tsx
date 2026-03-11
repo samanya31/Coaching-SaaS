@@ -5,6 +5,9 @@ import { useTenant } from '@/app/providers/TenantProvider';
 import { supabase } from '@/config/supabase';
 import { toast } from 'sonner';
 import r2 from '@/services/r2.service';
+import { usePlanFeatures } from '@/hooks/data/usePlan';
+import { Lock } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const PRESET_COLORS = [
     { name: 'Orange', hex: '#E25822' },
@@ -31,7 +34,8 @@ const PRESET_GRADIENTS = [
 ];
 
 export const Branding = () => {
-    const { coaching, refreshTenant } = useTenant();
+    const { coaching, refreshTenant, coachingId } = useTenant();
+    const { canUseBranding, isLoading: isPlanLoading } = usePlanFeatures(coachingId);
 
     // ─── BRANDING STATE ──────────────────────────────────────────────────────
     const [brandingData, setBrandingData] = useState({
@@ -57,6 +61,36 @@ export const Branding = () => {
             setBannerGradient(coaching.settings?.banner_gradient || DEFAULT_GRADIENT);
         }
     }, [coaching]);
+
+    if (isPlanLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+                    <p className="mt-4 text-gray-600">Loading...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (!canUseBranding) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[400px] bg-white rounded-2xl border border-dashed border-gray-300 p-12 text-center">
+                <div className="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center mb-6">
+                    <Lock className="w-8 h-8 text-indigo-600" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Branding is Locked</h2>
+                <p className="text-gray-600 max-w-sm mb-8">
+                    Custom logos, colors, and gradients are available on the **Advanced** and **Pro** plans. Upgrade to reflect your brand identity.
+                </p>
+                <Link to="/admin/dashboard/settings/plans">
+                    <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 px-8">
+                        View Upgrade Options
+                    </Button>
+                </Link>
+            </div>
+        );
+    }
 
     const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];

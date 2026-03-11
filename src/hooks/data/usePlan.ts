@@ -42,23 +42,26 @@ export const usePlan = (coachingId: string | null | undefined) =>
 export const usePlanFeatures = (coachingId: string | null | undefined) => {
     const { data: plan, isLoading } = usePlan(coachingId);
 
-    // No plan = no restriction (free tier / legacy)
+    // No plan = restrictive default (or legacy free tier)
     const noPlan = !plan;
 
     return {
         isLoading,
         plan,
-        // Feature flags — true if plan allows it (or no plan assigned)
-        canUseLiveClasses: noPlan || plan.live_classes,
-        canUseTests: noPlan || plan.tests_enabled,
-        canUsePayments: noPlan || plan.payments_enabled,
-        canUseCustomDomain: noPlan || plan.custom_domain,
-        canUseBranding: true, // TODO: Tie this to a specific db column on saas_plans if needed (e.g. `plan.branding_enabled`), for now it's a feature flag that's always on.
+        // Feature flags — true if plan allows it
+        canUseLiveClasses: !noPlan && plan.live_classes,
+        canUseTests: !noPlan && plan.tests_enabled,
+        canUsePayments: !noPlan && plan.payments_enabled,
+        canUseFinance: !noPlan && plan.payments_enabled, // Alias for Finance
+        canUseReports: !noPlan && plan.reports_enabled,
+        canUseCustomDomain: !noPlan && plan.custom_domain,
+        canUseBanners: !noPlan && plan.banners_enabled,
+        canUseBranding: !noPlan && plan.branding_enabled,
         // Limits
-        maxStudents: plan?.max_students ?? Infinity,
-        maxStorageGb: plan?.max_storage_gb ?? Infinity,
+        maxStudents: plan?.max_students ?? 100, // Safe default for free tier
+        maxStorageGb: plan?.max_storage_gb ?? 5,
         // Helpers
-        planName: plan?.name ?? 'Free',
-        planSlug: plan?.slug ?? 'free',
+        planName: plan?.name ?? 'No Plan',
+        planSlug: plan?.slug ?? 'none',
     };
 };

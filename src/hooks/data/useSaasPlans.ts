@@ -11,6 +11,9 @@ export interface SaasPlan {
     max_storage_gb: number;
     live_classes: boolean;
     tests_enabled: boolean;
+    banners_enabled: boolean;
+    branding_enabled: boolean;
+    reports_enabled: boolean;
     payments_enabled: boolean;
     custom_domain: boolean;
     support_level: string;

@@ -33,11 +33,11 @@ const allSidebarItems = [
     { path: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard', requiredRoles: ['coaching_admin', 'super_admin'], planFeature: undefined },
     { path: '/admin/dashboard/students', icon: Users, label: 'Students', requiredRoles: ['staff', 'coaching_admin', 'super_admin'], planFeature: undefined },
     { path: '/admin/dashboard/batches', icon: GraduationCap, label: 'Batches', requiredRoles: ['teacher', 'coaching_admin', 'super_admin'], planFeature: undefined },
-    { path: '/admin/dashboard/website', icon: Image, label: 'Website', requiredRoles: ['coaching_admin', 'super_admin'], planFeature: undefined },
+    { path: '/admin/dashboard/website', icon: Image, label: 'Website', requiredRoles: ['coaching_admin', 'super_admin'], planFeature: 'canUseBanners' as const },
     { path: '/admin/dashboard/tests', icon: FileText, label: 'Tests', requiredRoles: ['teacher', 'coaching_admin', 'super_admin'], planFeature: 'canUseTests' as const },
-    { path: '/admin/dashboard/payments', icon: IndianRupee, label: 'Finance', requiredRoles: ['coaching_admin', 'super_admin'], planFeature: 'canUsePayments' as const },
+    { path: '/admin/dashboard/payments', icon: IndianRupee, label: 'Finance', requiredRoles: ['coaching_admin', 'super_admin'], planFeature: 'canUseFinance' as const },
     { path: '/admin/dashboard/announcements', icon: Megaphone, label: 'Announcements', requiredRoles: ['teacher', 'coaching_admin', 'super_admin'], planFeature: undefined },
-    { path: '/admin/dashboard/reports', icon: BarChart3, label: 'Reports', requiredRoles: ['coaching_admin', 'super_admin'], planFeature: undefined },
+    { path: '/admin/dashboard/reports', icon: BarChart3, label: 'Reports', requiredRoles: ['coaching_admin', 'super_admin'], planFeature: 'canUseReports' as const },
     { path: '/admin/dashboard/instructors', icon: UserCog, label: 'Instructors', requiredRoles: ['staff', 'coaching_admin', 'super_admin'], planFeature: undefined },
     { path: '/admin/dashboard/support-tickets', icon: Ticket, label: 'Support Tickets', requiredRoles: ['coaching_admin', 'super_admin'], planFeature: undefined },
     { path: '/admin/dashboard/branding', icon: Palette, label: 'Branding', requiredRoles: ['coaching_admin', 'super_admin'], planFeature: 'canUseBranding' as const },
@@ -127,11 +127,14 @@ export const AdminLayout = () => {
                                 <div
                                     key={item.path}
                                     title={`Upgrade to unlock ${item.label}`}
-                                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 cursor-not-allowed select-none"
+                                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 relative group cursor-pointer"
+                                    onClick={() => navigate('/admin/dashboard/settings/plans')}
                                 >
-                                    <item.icon className="w-5 h-5 text-gray-300" />
-                                    <span className="font-medium flex-1">{item.label}</span>
-                                    <Lock className="w-3 h-3 text-gray-300" />
+                                    <item.icon className="w-5 h-5 opacity-40" />
+                                    <span className="font-medium flex-1 opacity-40">{item.label}</span>
+                                    <div className="p-1 bg-gray-50 rounded-md group-hover:bg-indigo-50 transition-colors">
+                                        <Lock className="w-3 h-3 text-gray-400 group-hover:text-indigo-500" />
+                                    </div>
                                 </div>
                             );
                         }
@@ -201,17 +204,35 @@ export const AdminLayout = () => {
                         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
                             {sidebarItems.map((item) => {
                                 const isActive = location.pathname === item.path;
+                                const isLocked = item.planFeature
+                                    ? !planFeatures[item.planFeature as keyof typeof planFeatures]
+                                    : false;
+
+                                if (isLocked) {
+                                    return (
+                                        <div
+                                            key={item.path}
+                                            onClick={() => { setIsSidebarOpen(false); navigate('/admin/dashboard/settings/plans'); }}
+                                            className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300"
+                                        >
+                                            <item.icon className="w-5 h-5 opacity-40" />
+                                            <span className="font-medium flex-1 opacity-40">{item.label}</span>
+                                            <Lock className="w-3 h-3" />
+                                        </div>
+                                    );
+                                }
+
                                 return (
                                     <Link
                                         key={item.path}
                                         to={item.path}
                                         onClick={() => setIsSidebarOpen(false)}
                                         className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive
-                                            ? 'bg-gradient-to-r from-indigo-50 to-purple-50 text-indigo-700'
+                                            ? 'bg-gradient-to-r from-indigo-50 to-purple-50 text-indigo-700 shadow-sm'
                                             : 'text-gray-600 hover:bg-gray-50'
                                             }`}
                                     >
-                                        <item.icon className="w-5 h-5" />
+                                        <item.icon className={`w-5 h-5 ${isActive ? 'text-indigo-700' : ''}`} />
                                         <span className="font-medium">{item.label}</span>
                                     </Link>
                                 );

@@ -5,11 +5,14 @@ import {
     Calendar, MoreVertical, Eye, Trash2, X
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { usePlanFeatures } from '@/hooks/data/usePlan';
+import { useTenant } from '@/app/providers/TenantProvider';
+import { Link } from 'react-router-dom';
+import { Lock } from 'lucide-react';
 import { Payment } from '@/types/payment';
 import { usePayments, useUpdatePaymentStatus } from '@/hooks/data/usePayments';
 import { useStudents } from '@/hooks/data/useUsers';
 import { useBatches } from '@/hooks/data/useBatches';
-import { useTenant } from '@/app/providers/TenantProvider';
 import { format, subDays, startOfMonth, isAfter, isSameDay, parseISO } from 'date-fns';
 import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid,
@@ -56,6 +59,8 @@ export const Finance = () => {
     const { data: students = [] } = useStudents();
     const { data: batches = [] } = useBatches();
     const { coachingId } = useTenant();
+
+    const { canUseFinance, isLoading: planLoading } = usePlanFeatures(coachingId);
 
     const updateStatusMutation = useUpdatePaymentStatus();
 
@@ -142,10 +147,30 @@ export const Finance = () => {
 
 
 
-    if (isLoading) {
+    if (isLoading || planLoading) {
         return (
             <div className="flex items-center justify-center min-h-[50vh]">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+            </div>
+        );
+    }
+
+    if (!canUseFinance) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[60vh] bg-white rounded-3xl border border-dashed border-gray-200 p-12 text-center">
+                <div className="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mb-6">
+                    <Lock className="w-8 h-8 text-indigo-600" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-3">Finance Management is Locked</h2>
+                <p className="text-gray-600 max-w-md mx-auto mb-8">
+                    Revenue tracking and payment management are available on the **Advanced** and **Pro** plans. Upgrade to start collecting payments seamlessly.
+                </p>
+                <Link
+                    to="/admin/dashboard/settings/plans"
+                    className="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-200 hover:shadow-xl hover:translate-y-[-2px] transition-all"
+                >
+                    View Upgrade Options
+                </Link>
             </div>
         );
     }
@@ -508,9 +533,6 @@ export const Finance = () => {
                     )}
                 </DialogContent>
             </Dialog>
-
-
         </div>
     );
 };
-

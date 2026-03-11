@@ -4,6 +4,9 @@ import { Search, Filter, Plus, FileText, CheckCircle, Clock } from 'lucide-react
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { useTests, type TestType, type TestStatus } from '@/hooks/data/useTests';
+import { usePlanFeatures } from '@/hooks/data/usePlan';
+import { useTenant } from '@/app/providers/TenantProvider';
+import { Lock } from 'lucide-react';
 
 const getTypeColor = (type: TestType) => {
     switch (type) {
@@ -47,13 +50,35 @@ export const Tests = () => {
         return matchesSearch && matchesType;
     });
 
-    if (isLoading) {
+    const { coachingId } = useTenant();
+    const { canUseTests, isLoading: isPlanLoading } = usePlanFeatures(coachingId);
+
+    if (isLoading || isPlanLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Loading tests...</p>
+                    <p className="mt-4 text-gray-600">Loading...</p>
                 </div>
+            </div>
+        );
+    }
+
+    if (!canUseTests) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[400px] bg-white rounded-2xl border border-dashed border-gray-300 p-12 text-center">
+                <div className="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center mb-6">
+                    <Lock className="w-8 h-8 text-indigo-600" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Tests are Locked</h2>
+                <p className="text-gray-600 max-w-sm mb-8">
+                    Mock tests, practice sets, and live quizzes are available on the **Advanced** and **Pro** plans. Upgrade to start assessing your students.
+                </p>
+                <Link to="/admin/dashboard/settings/plans">
+                    <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 px-8">
+                        View Upgrade Options
+                    </Button>
+                </Link>
             </div>
         );
     }

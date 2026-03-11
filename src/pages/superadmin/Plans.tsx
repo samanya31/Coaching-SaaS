@@ -4,6 +4,7 @@ import {
     Crown, Users, HardDrive, Video, FileText,
     IndianRupee, Globe, Headphones, Plus, Pencil,
     Trash2, Star, Check, X, Loader2, AlertTriangle, ToggleLeft, ToggleRight,
+    Image, Palette, BarChart3
 } from 'lucide-react';
 import { useSaasPlans, useUpsertSaasPlan, useDeleteSaasPlan, SaasPlan } from '@/hooks/data/useSaasPlans';
 
@@ -97,6 +98,9 @@ const PlanCard = ({
                 <FeatureRow icon={HardDrive} label="Storage" value={`${plan.max_storage_gb} GB`} />
                 <FeatureRow icon={Video} label="Live Classes" value={plan.live_classes} />
                 <FeatureRow icon={FileText} label="Tests & Exams" value={plan.tests_enabled} />
+                <FeatureRow icon={Image} label="Banners Management" value={plan.banners_enabled} />
+                <FeatureRow icon={Palette} label="Custom Branding" value={plan.branding_enabled} />
+                <FeatureRow icon={BarChart3} label="Reports Management" value={plan.reports_enabled} />
                 <FeatureRow icon={IndianRupee} label="Payment Collection" value={plan.payments_enabled} />
                 <FeatureRow icon={Globe} label="Custom Domain" value={plan.custom_domain} />
                 <div className="flex items-center justify-between py-2">
@@ -149,6 +153,8 @@ const DEFAULT_PLAN: Partial<SaasPlan> = {
     price_monthly: 999, price_yearly: 9999,
     max_students: 100, max_storage_gb: 10,
     live_classes: false, tests_enabled: true,
+    banners_enabled: false, branding_enabled: false,
+    reports_enabled: false,
     payments_enabled: false, custom_domain: false,
     support_level: 'email',
     is_popular: false, is_active: true, sort_order: 99,
@@ -260,6 +266,9 @@ const PlanModal = ({
                         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Feature Flags</p>
                         <Toggle label="Live Classes" value={!!form.live_classes} onChange={v => set('live_classes', v)} />
                         <Toggle label="Tests & Exams" value={!!form.tests_enabled} onChange={v => set('tests_enabled', v)} />
+                        <Toggle label="Banners Management" value={!!form.banners_enabled} onChange={v => set('banners_enabled', v)} />
+                        <Toggle label="Custom Branding" value={!!form.branding_enabled} onChange={v => set('branding_enabled', v)} />
+                        <Toggle label="Reports Management" value={!!form.reports_enabled} onChange={v => set('reports_enabled', v)} />
                         <Toggle label="Payment Collection" value={!!form.payments_enabled} onChange={v => set('payments_enabled', v)} />
                         <Toggle label="Custom Domain" value={!!form.custom_domain} onChange={v => set('custom_domain', v)} />
                         <Toggle label="Popular Badge" value={!!form.is_popular} onChange={v => set('is_popular', v)} />
